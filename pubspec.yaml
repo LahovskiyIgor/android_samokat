@@ -1,0 +1,63 @@
+name: by_happy
+description: "A new Flutter project."
+publish_to: 'none'
+
+version: 1.0.0+1
+
+environment:
+  sdk: ^3.8.1
+
+dependencies:
+  flutter:
+    sdk: flutter
+  cupertino_icons: ^1.0.8
+  flutter_secure_storage: ^9.2.4
+  shared_preferences: ^2.5.3
+  http: ^1.2.0
+  equatable: ^2.0.0
+  flutter_bloc: ^9.1.1
+  get_it: ^7.6.7
+  image_picker: ^1.0.7
+  path: ^1.9.0
+  async: ^2.11.0
+  mime: ^1.0.5
+  intl: ^0.19.0
+  url_launcher: ^6.2.5
+  go_router: ^14.0.0
+  android_id: ^0.4.0
+  device_info_plus: ^12.3.0
+  mobile_scanner: ^5.1.1
+  yandex_mapkit: ^4.2.1
+  geolocator: ^11.0.0
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^5.0.0
+  flutter_launcher_icons: ^0.14.4
+
+flutter_launcher_icons:
+  android: true
+  ios: true
+  image_path: "assets/main-logo.png"
+
+flutter:
+  uses-material-design: true
+
+  assets:
+    - assets/
+    - assets/icons/
+
+
+  # fonts:
+  #   - family: Schyler
+  #     fonts:
+  #       - asset: fonts/Schyler-Regular.ttf
+  #       - asset: fonts/Schyler-Italic.ttf
+  #         style: italic
+  #   - family: Trajan Pro
+  #     fonts:
+  #       - asset: fonts/TrajanPro.ttf
+  #       - asset: fonts/TrajanPro_Bold.ttf
+  #         weight: 700
+
