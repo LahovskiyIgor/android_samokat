@@ -97,12 +97,12 @@ class ScooterDetailScreen extends StatelessWidget {
                         width: double.infinity,
                         fontSize: 16,
                         onTap: () {
-                          showModalBottomSheet(
-                            context: context,
-                            isScrollControlled: true,
-                            backgroundColor: Colors.transparent,
-                            builder: (context) => const TariffSheet(),
-                          );
+                          // showModalBottomSheet(
+                          //   context: context,
+                          //   isScrollControlled: true,
+                          //   backgroundColor: Colors.transparent,
+                          //   builder: (context) => const TariffSheet(),
+                          // );
                         },
                       ),
                     ],

@@ -7,6 +7,7 @@ import 'package:by_happy/domain/usecase/get_scooter_usecase.dart';
 import 'package:by_happy/domain/usecase/save_map_settings_usecase.dart';
 import 'package:by_happy/presentation/components/map_icon_painter/clusterized_icon_painter.dart';
 import 'package:by_happy/presentation/components/sheet/map_settings_sheet.dart';
+import 'package:by_happy/presentation/components/sheet/tariff_sheet.dart';
 import 'package:by_happy/presentation/event/map_settings_modal_event.dart';
 import 'package:by_happy/presentation/viewmodel/map_settings_modal_bloc.dart';
 import 'package:flutter/material.dart';
@@ -92,10 +93,10 @@ class _MapScreenState extends State<MapScreen> {
   }
 
   Future<void> _moveCameraToPoint(
-    double lat,
-    double lon, {
-    double zoom = 15,
-  }) async {
+      double lat,
+      double lon, {
+        double zoom = 15,
+      }) async {
     await mapController?.moveCamera(
       CameraUpdate.newCameraPosition(
         CameraPosition(
@@ -115,17 +116,17 @@ class _MapScreenState extends State<MapScreen> {
       builder: (context) {
         return BlocProvider(
           create: (context) =>
-              ScooterDetailModalBloc(
-                getIt<GetAddressByPointUsecase>(),
-                getIt<GetScooterUsecase>(),
-                getIt<GetPedestrianRoutesUsecase>(),
-              )..add(
-                ScooterDetailModalStarted(
-                  scooters,
-                  _currentPosition!.latitude,
-                  _currentPosition!.longitude,
-                ),
-              ),
+          ScooterDetailModalBloc(
+            getIt<GetAddressByPointUsecase>(),
+            getIt<GetScooterUsecase>(),
+            getIt<GetPedestrianRoutesUsecase>(),
+          )..add(
+            ScooterDetailModalStarted(
+              scooters,
+              _currentPosition!.latitude,
+              _currentPosition!.longitude,
+            ),
+          ),
           child: ScooterBottomSheet(),
         );
       },
@@ -150,14 +151,38 @@ class _MapScreenState extends State<MapScreen> {
     );
   }
 
+  void _onNotificationTap() {
+    // Заглушка - создаём тестовый самокат
+    final testScooter = Scooter(
+      id: 123456,
+      number: '123-456',
+      latitude: 53.9,
+      longitude: 27.56,
+      batteryLevel: 87, // ← int, не double!
+      distance: 350,
+      title: 'Самокат',
+      status: 'available',
+      isOnline: true,
+      maxSpeed: 25,
+    );
+
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      isDismissible: true,
+      builder: (context) => TariffSheet(scooter: testScooter),
+    );
+  }
+
   void _initScooterIcon() async {
     await ClusterIconPainter.initImage('assets/icons/scooter_placemark.png');
   }
 
   List<PlacemarkMapObject> _buildScooterPlacemarks(
-    List<Scooter> scooters,
-    String address,
-  ) {
+      List<Scooter> scooters,
+      String address,
+      ) {
     return scooters.map((scooter) {
       return PlacemarkMapObject(
         mapId: MapObjectId('${scooter.id}'),
@@ -183,38 +208,38 @@ class _MapScreenState extends State<MapScreen> {
 
     return zones
         .map((zone) {
-          Color strokeColor = Color(0xFF86EFAC), fillColor = Color(0xFF86EFAC);
+      Color strokeColor = Color(0xFF86EFAC), fillColor = Color(0xFF86EFAC);
 
-          if (zone.type == "Drive") {
-            strokeColor = const Color(0xFF1A73E8);
-            fillColor = (const Color(0xFF1A73E8)).withOpacity(0.15);
-          } else if (zone.type == "NotDrive") {
-            strokeColor = const Color(0xFFEF4444);
-            fillColor = (const Color(0xFFEF4444)).withOpacity(0.15);
-          } else if (zone.type == "Finish") {
-            strokeColor = const Color(0xFFA78BFA);
-            fillColor = (const Color(0xFFA78BFA)).withOpacity(0.15);
-          }
+      if (zone.type == "Drive") {
+        strokeColor = const Color(0xFF1A73E8);
+        fillColor = (const Color(0xFF1A73E8)).withOpacity(0.15);
+      } else if (zone.type == "NotDrive") {
+        strokeColor = const Color(0xFFEF4444);
+        fillColor = (const Color(0xFFEF4444)).withOpacity(0.15);
+      } else if (zone.type == "Finish") {
+        strokeColor = const Color(0xFFA78BFA);
+        fillColor = (const Color(0xFFA78BFA)).withOpacity(0.15);
+      }
 
-          return PolygonMapObject(
-            mapId: MapObjectId('zone_${zone.id}'),
-            polygon: Polygon(
-              outerRing: LinearRing(
-                points: zone.points.map((point) {
-                  return Point(
-                    latitude: point.latitude,
-                    longitude: point.longitude,
-                  );
-                }).toList(),
-              ),
-              innerRings: [],
-            ),
-            strokeColor: strokeColor,
-            strokeWidth: 2,
-            fillColor: fillColor,
-            zIndex: 0,
-          );
-        })
+      return PolygonMapObject(
+        mapId: MapObjectId('zone_${zone.id}'),
+        polygon: Polygon(
+          outerRing: LinearRing(
+            points: zone.points.map((point) {
+              return Point(
+                latitude: point.latitude,
+                longitude: point.longitude,
+              );
+            }).toList(),
+          ),
+          innerRings: [],
+        ),
+        strokeColor: strokeColor,
+        strokeWidth: 2,
+        fillColor: fillColor,
+        zIndex: 0,
+      );
+    })
         .whereType<PolygonMapObject>()
         .toList();
   }
@@ -247,10 +272,10 @@ class _MapScreenState extends State<MapScreen> {
                     },
                     onCameraPositionChanged:
                         (cameraPosition, reason, finished) {
-                          if (finished) {
-                            _fetchScooters();
-                          }
-                        },
+                      if (finished) {
+                        _fetchScooters();
+                      }
+                    },
                     mapObjects: [
                       ...zonePolygons,
                       ClusterizedPlacemarkCollection(
@@ -370,11 +395,9 @@ class _MapScreenState extends State<MapScreen> {
         Positioned(
           top: 16,
           right: 16,
-          child: Builder(
-            builder: (innerContext) => _RoundIconButton(
-              icon: Icons.notifications_sharp,
-              onPressed: () => Scaffold.of(innerContext).openDrawer(),
-            ),
+          child: _RoundIconButton(
+            icon: Icons.notifications_sharp,
+            onPressed: _onNotificationTap,
           ),
         ),
       ],
