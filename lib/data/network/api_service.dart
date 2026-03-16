@@ -14,6 +14,7 @@ import 'package:path/path.dart';
 
 import '../../domain/entities/user_profile.dart';
 import '../models/scooters_response.dart';
+import '../models/tariffs_response.dart';
 import '../models/zones_response.dart';
 
 class ApiService {
@@ -411,6 +412,48 @@ class ApiService {
     return null;
   }
 
+  Future<TariffsResponse?> getAvailableTariffs({required int scooterId}) async {
+    final url = Uri.parse("$baseUrl/scooterplan/$scooterId/available");
+
+    print("url $url");
+
+    final accessToken = await _securityService.getAccessToken();
+    if (accessToken == null) {
+      print("APISERVICE Error: Access token is null.");
+      return null;
+    }
+
+    final response = await http.get(
+      url,
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": "Bearer $accessToken",
+      },
+    );
+
+    print("APISERVICE (getAvailableTariffs): ${response.statusCode}, ${response.body}");
+
+    if (response.statusCode == 200) {
+      final data = jsonDecode(utf8.decode(response.bodyBytes));
+      return TariffsResponse.fromJson(data);
+    }
+
+    print("APISERVICE (getAvailableTariffs) Error: Failed with status code ${response.statusCode}");
+    return null;
+  }
+
+  String? _parseErrorMessage(dynamic data) {
+    if (data is Map<String, dynamic>) {
+      final messages = data['message'] as List?;
+      if (messages != null && messages.isNotEmpty) {
+        final firstError = messages.first as Map<String, dynamic>?;
+        return firstError?['message'] as String?;
+      }
+      return data['message'] as String?;
+    }
+    return null;
+  }
+
   Future<void> addPaymentCard({
     required String cardNumber,
     required int expirationMonth,
@@ -472,17 +515,5 @@ class ApiService {
     }
 
     throw AuthException('Ошибка сервера: ${response.statusCode}', 0);
-  }
-
-  String? _parseErrorMessage(dynamic data) {
-    if (data is Map<String, dynamic>) {
-      final messages = data['message'] as List?;
-      if (messages != null && messages.isNotEmpty) {
-        final firstError = messages.first as Map<String, dynamic>?;
-        return firstError?['message'] as String?;
-      }
-      return data['message'] as String?;
-    }
-    return null;
   }
 }

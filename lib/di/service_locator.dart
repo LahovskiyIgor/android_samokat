@@ -16,6 +16,7 @@ import 'package:by_happy/domain/usecase/add_payment_card_usecase.dart'; // ‚Üê –
 import 'package:by_happy/domain/usecase/create_pin_usecase.dart';
 import 'package:by_happy/domain/usecase/get_address_by_point_usecase.dart';
 import 'package:by_happy/domain/usecase/get_available_scooters_usecase.dart';
+import 'package:by_happy/domain/usecase/get_available_tariffs_usecase.dart';
 import 'package:by_happy/domain/usecase/get_available_zones_usecase.dart';
 import 'package:by_happy/domain/usecase/get_map_settings_usecase.dart';
 import 'package:by_happy/domain/usecase/get_pedestrian_routes_usecase.dart';
@@ -118,6 +119,7 @@ Future<void> setupDependencies() async {
   );
 
   getIt.registerSingleton<GetScooterUsecase>(GetScooterUsecase(getIt()));
+  getIt.registerSingleton<GetAvailableTariffsUsecase>(GetAvailableTariffsUsecase(getIt()));
   getIt.registerSingleton<GetAddressByPointUsecase>(GetAddressByPointUsecase(getIt()));
   getIt.registerSingleton<GetPedestrianRoutesUsecase>(GetPedestrianRoutesUsecase(getIt()));
   getIt.registerSingleton<GetAvailableZonesUsecase>(GetAvailableZonesUsecase(getIt()));

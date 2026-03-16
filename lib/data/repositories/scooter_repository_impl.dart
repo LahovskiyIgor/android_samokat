@@ -3,6 +3,7 @@ import 'package:by_happy/domain/repositories/scooter_repository.dart';
 import '../../core/failures.dart';
 import '../../core/result.dart';
 import '../../domain/entities/scooter.dart';
+import '../../domain/entities/tariff.dart';
 import '../exceptions/auth_exception.dart';
 import '../network/api_service.dart';
 
@@ -64,8 +65,19 @@ class ScooterRepositoryImpl extends ScooterRepository {
     return result;
   }
 
-
-
-
-
+  @override
+  Future<Result<List<Tariff>>> getAvailableTariffs(int scooterId) async {
+    late final Result<List<Tariff>> result;
+    try {
+      final response = await _apiService.getAvailableTariffs(scooterId: scooterId);
+      if (response != null) {
+        result = Success(response.tariffs);
+      } else {
+        result = Failure(UnknownFailure());
+      }
+    } catch (e) {
+      result = Failure(UnknownFailure());
+    }
+    return result;
+  }
 }
