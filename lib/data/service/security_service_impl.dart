@@ -6,6 +6,7 @@ import '../../domain/service/security_service.dart';
 class SecurityServiceImpl extends SecurityService {
   static const String kAccessToken = "access_token";
   static const String kRefreshToken = "refresh_token";
+  static const String kCardNumberPrefix = "card_number_";
 
   final FlutterSecureStorage _secureStorage;
 
@@ -33,18 +34,21 @@ class SecurityServiceImpl extends SecurityService {
     return await _secureStorage.read(key: kRefreshToken);
   }
 
-  // @override
-  // Future<UserAuthData?> getTokens() async {
-  //   final accessToken = await _secureStorage.read(key: kAccessToken);
-  //   final refreshToken = await _secureStorage.read(key: kRefreshToken);
-  //
-  //   if(accessToken != null && refreshToken != null) {
-  //       return UserAuthData(
-  //       accessToken: accessToken,
-  //       refreshToken: refreshToken,
-  //     );
-  //   }
-  //
-  //   return null;
-  // }
+  @override
+  Future<void> saveCardNumber(int cardId, String cardNumber) async {
+    await _secureStorage.write(
+      key: '${kCardNumberPrefix}_$cardId',
+      value: cardNumber,
+    );
+  }
+
+  @override
+  Future<String?> getCardNumber(int cardId) async {
+    return await _secureStorage.read(key: '${kCardNumberPrefix}_$cardId');
+  }
+
+  @override
+  Future<void> deleteCardNumber(int cardId) async {
+    await _secureStorage.delete(key: '${kCardNumberPrefix}_$cardId');
+  }
 }

@@ -1,3 +1,4 @@
+import 'package:by_happy/domain/entities/payment_card.dart';
 import '../../core/failures.dart';
 import '../../core/result.dart';
 import '../../domain/repositories/payment_repository.dart';
@@ -39,6 +40,34 @@ class PaymentRepositoryImpl implements PaymentRepository {
       return Failure(UnknownFailure());
     } catch (e) {
       // ✅ Любая другая ошибка — UnknownFailure
+      return Failure(UnknownFailure());
+    }
+  }
+
+  @override
+  Future<Result<List<PaymentCard>>> getPaymentCards() async {
+    try {
+      final cards = await apiService.getPaymentCards();
+      return Success(cards);
+    } on UnauthorizedException catch (_) {
+      return Failure(UnknownFailure());
+    } on AuthBlockException catch (_) {
+      return Failure(AuthBlockFailure());
+    } catch (e) {
+      return Failure(UnknownFailure());
+    }
+  }
+
+  @override
+  Future<Result<PaymentCard>> setMainPaymentCard(int cardId) async {
+    try {
+      final card = await apiService.setMainPaymentCard(cardId);
+      return Success(card);
+    } on UnauthorizedException catch (_) {
+      return Failure(UnknownFailure());
+    } on AuthBlockException catch (_) {
+      return Failure(AuthBlockFailure());
+    } catch (e) {
       return Failure(UnknownFailure());
     }
   }

@@ -6,5 +6,9 @@ abstract class SecurityService {
   Future<void> removeTokens();
   Future<String?> getRefreshToken();
   Future<String?> getAccessToken();
-  // Future<UserAuthData?> getTokens();
+  
+  // Методы для работы с номерами карт
+  Future<void> saveCardNumber(int cardId, String cardNumber);
+  Future<String?> getCardNumber(int cardId);
+  Future<void> deleteCardNumber(int cardId);
 }

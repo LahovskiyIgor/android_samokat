@@ -4,6 +4,7 @@ import 'package:async/async.dart';
 import 'package:by_happy/data/exceptions/auth_block_exception.dart';
 import 'package:by_happy/data/exceptions/auth_exception.dart';
 import 'package:by_happy/data/exceptions/unauthorized_exception.dart';
+import 'package:by_happy/domain/entities/payment_card.dart';
 import 'package:by_happy/domain/entities/scooter.dart';
 import 'package:by_happy/domain/service/security_service.dart';
 import 'package:http/http.dart' as http;
@@ -13,6 +14,7 @@ import 'package:mime/mime.dart';
 import 'package:path/path.dart';
 
 import '../../domain/entities/user_profile.dart';
+import '../models/payment_card_response_dto.dart';
 import '../models/scooters_response.dart';
 import '../models/tariffs_response.dart';
 import '../models/zones_response.dart';
@@ -512,6 +514,102 @@ class ApiService {
       throw AuthBlockException();
     } else if (response.statusCode == 404) {
       throw AuthException('Пользователь не найден', 0);
+    }
+
+    throw AuthException('Ошибка сервера: ${response.statusCode}', 0);
+  }
+
+  Future<List<PaymentCard>> getPaymentCards() async {
+    final url = Uri.parse("$baseUrl/client/me");
+
+    final accessToken = await _securityService.getAccessToken();
+    if (accessToken == null) {
+      print("APISERVICE Error: Access token is null.");
+      throw UnauthorizedException();
+    }
+
+    final response = await http.get(
+      url,
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": "Bearer $accessToken",
+      },
+    );
+
+    print("GET CARDS RESPONSE:");
+    print("STATUS: ${response.statusCode}");
+    print("BODY: ${response.body}");
+
+    if (response.statusCode == 200) {
+      final data = jsonDecode(utf8.decode(response.bodyBytes));
+      final clientCardsJson = data['clientCards'] as List?;
+
+      if (clientCardsJson == null || clientCardsJson.isEmpty) {
+        return [];
+      }
+
+      final cards = <PaymentCard>[];
+      for (final cardJson in clientCardsJson) {
+        final cardDto = PaymentCardResponseDto.fromJson(cardJson);
+        
+        // Получаем полный номер карты из безопасного хранилища
+        final fullCardNumber = await _securityService.getCardNumber(cardDto.id);
+        
+        cards.add(cardDto.toEntity(fullCardNumber: fullCardNumber));
+      }
+
+      return cards;
+    } else if (response.statusCode == 401) {
+      throw UnauthorizedException();
+    } else if (response.statusCode == 403) {
+      throw AuthBlockException();
+    }
+
+    throw Exception('Ошибка сервера: ${response.statusCode}');
+  }
+
+  Future<PaymentCard> setMainPaymentCard(int cardId) async {
+    final url = Uri.parse("$baseUrl/client/card/$cardId");
+
+    final accessToken = await _securityService.getAccessToken();
+    if (accessToken == null) {
+      print("APISERVICE Error: Access token is null.");
+      throw UnauthorizedException();
+    }
+
+    print("SET MAIN CARD REQUEST:");
+    print("URL: $url");
+    print("BODY: { isMain: true }");
+
+    final response = await http.put(
+      url,
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": "Bearer $accessToken",
+      },
+      body: jsonEncode({
+        "isMain": true,
+      }),
+    );
+
+    print("SET MAIN CARD RESPONSE:");
+    print("STATUS: ${response.statusCode}");
+    print("BODY: ${response.body}");
+
+    if (response.statusCode == 200 || response.statusCode == 201) {
+      final data = jsonDecode(utf8.decode(response.bodyBytes));
+      final cardDto = PaymentCardResponseDto.fromJson(data);
+      
+      // Получаем полный номер карты из безопасного хранилища
+      final fullCardNumber = await _securityService.getCardNumber(cardDto.id);
+      
+      return cardDto.toEntity(fullCardNumber: fullCardNumber);
+    } else if (response.statusCode == 401) {
+      throw UnauthorizedException();
+    } else if (response.statusCode == 403) {
+      throw AuthBlockException();
+    } else if (response.statusCode == 404) {
+      throw AuthException('Карта не найдена', 0);
     }
 
     throw AuthException('Ошибка сервера: ${response.statusCode}', 0);
