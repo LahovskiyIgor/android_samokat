@@ -10,6 +10,7 @@ import 'package:by_happy/presentation/components/sheet/map_settings_sheet.dart';
 import 'package:by_happy/presentation/components/sheet/tariff_sheet.dart';
 import 'package:by_happy/presentation/event/map_settings_modal_event.dart';
 import 'package:by_happy/presentation/viewmodel/map_settings_modal_bloc.dart';
+import 'package:by_happy/presentation/viewmodel/tariff_sheet_bloc.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:geolocator/geolocator.dart';
@@ -21,6 +22,7 @@ import '../../di/service_locator.dart';
 import '../../domain/entities/scooter.dart';
 import '../../domain/entities/zone.dart';
 import '../../domain/usecase/get_address_by_point_usecase.dart';
+import '../../domain/usecase/get_available_tariffs_usecase.dart';
 import '../components/sheet/scooter_bottom_sheet.dart';
 import '../components/side_menu.dart';
 import '../event/map_event.dart';
@@ -144,13 +146,15 @@ class _MapScreenState extends State<MapScreen> {
       if (result == true) {
         // Даем небольшую задержку, чтобы навигация завершилась корректно
         Future.delayed(Duration(milliseconds: 300), () {
-
           showModalBottomSheet(
             context: context,
             isScrollControlled: true,
             backgroundColor: Colors.transparent,
             isDismissible: true,
-            builder: (context) => TariffSheet(scooter: scoot),
+            builder: (context) => BlocProvider(
+              create: (context) => TariffSheetBloc(getIt<GetAvailableTariffsUsecase>()),
+              child: TariffSheet(scooter: scoot),
+            ),
           );
         });
       }
