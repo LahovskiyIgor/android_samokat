@@ -13,6 +13,7 @@ import 'package:by_happy/presentation/viewmodel/map_settings_modal_bloc.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:geolocator/geolocator.dart';
+import 'package:go_router/go_router.dart';
 import 'package:yandex_mapkit/yandex_mapkit.dart';
 
 import '../../core/app_colors.dart';
@@ -81,11 +82,12 @@ class _MapScreenState extends State<MapScreen> {
     print("region: $visibleRegion");
 
     final area = [
-      visibleRegion.bottomRight.latitude,
-      visibleRegion.bottomRight.longitude,
       visibleRegion.topLeft.latitude,
       visibleRegion.topLeft.longitude,
+      visibleRegion.bottomRight.latitude,
+      visibleRegion.bottomRight.longitude,
     ];
+
 
     if (mounted) {
       context.read<MapBloc>().add(FetchScooters(area));
@@ -107,8 +109,8 @@ class _MapScreenState extends State<MapScreen> {
     );
   }
 
-  void _onMarkerTap(List<Scooter> scooters) {
-    showModalBottomSheet(
+  void _onMarkerTap(List<Scooter> scooters) async {
+    final scoot = await showModalBottomSheet<Scooter>(
       context: context,
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
@@ -131,6 +133,28 @@ class _MapScreenState extends State<MapScreen> {
         );
       },
     );
+
+    if (scoot != null) {
+
+      // 3. Переходим на экран деталей и ЖДЕМ его закрытия
+      final result = await context.push('/home/scooter/${scoot.id}');
+
+
+      // 4. Если из деталей вернулись с просьбой открыть вторую шторку
+      if (result == true) {
+        // Даем небольшую задержку, чтобы навигация завершилась корректно
+        Future.delayed(Duration(milliseconds: 300), () {
+
+          showModalBottomSheet(
+            context: context,
+            isScrollControlled: true,
+            backgroundColor: Colors.transparent,
+            isDismissible: true,
+            builder: (context) => TariffSheet(scooter: scoot),
+          );
+        });
+      }
+    }
   }
 
   void _onMapSettingsTap() {
@@ -152,28 +176,10 @@ class _MapScreenState extends State<MapScreen> {
   }
 
   void _onNotificationTap() {
-    // Заглушка - создаём тестовый самокат
-    final testScooter = Scooter(
-      id: 123456,
-      number: '123-456',
-      latitude: 53.9,
-      longitude: 27.56,
-      batteryLevel: 87, // ← int, не double!
-      distance: 350,
-      title: 'Самокат',
-      status: 'available',
-      isOnline: true,
-      maxSpeed: 25,
-    );
 
-    showModalBottomSheet(
-      context: context,
-      isScrollControlled: true,
-      backgroundColor: Colors.transparent,
-      isDismissible: true,
-      builder: (context) => TariffSheet(scooter: testScooter),
-    );
   }
+
+
 
   void _initScooterIcon() async {
     await ClusterIconPainter.initImage('assets/icons/scooter_placemark.png');
@@ -192,7 +198,7 @@ class _MapScreenState extends State<MapScreen> {
             image: BitmapDescriptor.fromAssetImage(
               'assets/icons/scooter_placemark_fill.png',
             ),
-            scale: 0.2,
+            scale: 3.0,
           ),
         ),
         opacity: 1.0,

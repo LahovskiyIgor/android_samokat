@@ -97,6 +97,7 @@ class ScooterDetailScreen extends StatelessWidget {
                         width: double.infinity,
                         fontSize: 16,
                         onTap: () {
+                          context.pop(true);
                           // showModalBottomSheet(
                           //   context: context,
                           //   isScrollControlled: true,

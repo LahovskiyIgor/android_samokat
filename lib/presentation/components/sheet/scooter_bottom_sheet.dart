@@ -240,7 +240,7 @@ class _ScooterCard extends StatelessWidget {
                 width: double.infinity,
                 fontSize: 12,
                 onTap: () {
-                  context.go('/home/scooter/${scooter.id}');
+                  Navigator.pop(context, scooter);
                 },
               ),
 

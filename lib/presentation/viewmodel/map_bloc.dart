@@ -16,19 +16,17 @@ class MapBloc extends Bloc<ScooterEvent, ScooterState> {
   final GetAvailableZonesUsecase getAvailableZonesUsecase;
   final GetMapSettingsUsecase getMapSettingsUsecase;
 
-  MapBloc( this.getAvailableZonesUsecase, this.getScootersUsecase, this.getMapSettingsUsecase) : super(
-      ScooterState(
-        isGeomarksShowed: true,
-  )) {
-    on<FetchScooters>(_onFetchScooters);
-    on<UpdateMap>(_onUpdateMap);
-  }
-
   Future<void> _onFetchScooters(FetchScooters event, Emitter<ScooterState> emit) async {
     emit(state.copyWith(status: ScooterStatus.loading));
 
+    final List<double> list = [];
+    list.addAll(event.area);
+    var temp = list[0];
+    list[0] = list[1];
+    list[1] = temp;
+
       final results = await Future.wait([
-        getScootersUsecase(event.area, 0, 100),
+        getScootersUsecase(list, 0, 100),
         getAvailableZonesUsecase(event.area, 0, 100),
         getMapSettingsUsecase(),
       ]);
@@ -62,6 +60,14 @@ class MapBloc extends Bloc<ScooterEvent, ScooterState> {
         area: event.area,
         isGeomarksShowed: settings.all_placemarks,
       ));
+  }
+
+  MapBloc( this.getAvailableZonesUsecase, this.getScootersUsecase, this.getMapSettingsUsecase) : super(
+      ScooterState(
+        isGeomarksShowed: true,
+  )) {
+    on<FetchScooters>(_onFetchScooters);
+    on<UpdateMap>(_onUpdateMap);
   }
 
   Future<void> _onUpdateMap(UpdateMap event, Emitter<ScooterState> emit) async {
