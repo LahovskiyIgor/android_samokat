@@ -13,6 +13,7 @@ import 'package:mime/mime.dart';
 import 'package:path/path.dart';
 
 import '../../domain/entities/user_profile.dart';
+import '../../domain/entities/payment_card.dart';
 import '../models/scooters_response.dart';
 import '../models/tariffs_response.dart';
 import '../models/zones_response.dart';
@@ -174,6 +175,51 @@ class ApiService {
     }
 
     return null;
+  }
+
+  Future<List<PaymentCard>> getPaymentCards() async {
+    final url = Uri.parse("$baseUrl/client/me");
+
+    String? accessToken = await _securityService.getAccessToken();
+
+    final response = await http.get(
+      url,
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": "Bearer $accessToken",
+      },
+    );
+
+    if (response.statusCode == 200) {
+      final data = jsonDecode(utf8.decode(response.bodyBytes));
+      final clientCardsJson = data["clientCards"] as List<dynamic>?;
+      
+      if (clientCardsJson == null || clientCardsJson.isEmpty) {
+        return [];
+      }
+
+      final cards = <PaymentCard>[];
+      for (final cardJson in clientCardsJson) {
+        final cardId = cardJson['id'] as int;
+        // Получаем полный номер карты из локального хранилища
+        final fullNumber = await _securityService.getCardFullNumber(cardId);
+        
+        cards.add(PaymentCard(
+          id: cardId,
+          clientId: cardJson['clientId'] as int,
+          expirationMonth: cardJson['expirationMonth'] as int,
+          expirationYear: cardJson['expirationYear'] as int,
+          cardHolder: cardJson['cardHolder'] as String,
+          cardLastNumber: cardJson['cardLastNumber'] as String,
+          isMain: cardJson['isMain'] as bool,
+          fullCardNumber: fullNumber,
+        ));
+      }
+      
+      return cards;
+    }
+
+    throw Exception("Failed to get payment cards: ${response.statusCode}");
   }
 
   Future<UserProfile?> updateProfile(UserProfile profile) async {
@@ -454,8 +500,9 @@ class ApiService {
     return null;
   }
 
-  Future<void> addPaymentCard({
+  Future<int> addPaymentCard({
     required String cardNumber,
+    required String cardHolder,
     required int expirationMonth,
     required int expirationYear,
     required String cvv,
@@ -476,6 +523,7 @@ class ApiService {
     print(
       "BODY: { "
           "cardNumber: $cleanCardNumber, "
+          "cardHolder: $cardHolder, "
           "expirationMonth: $expirationMonth, "
           "expirationYear: $expirationYear, "
           "cvv: ***"
@@ -489,7 +537,8 @@ class ApiService {
         "Authorization": "Bearer $accessToken",
       },
       body: jsonEncode({
-        "cardNumber": cleanCardNumber, // ← Отправляем чистый номер
+        "cardNumber": cleanCardNumber,
+        "cardHolder": cardHolder,
         "expirationMonth": expirationMonth,
         "expirationYear": expirationYear,
         "cvv": cvv,
@@ -501,7 +550,8 @@ class ApiService {
     print("BODY: ${response.body}");
 
     if (response.statusCode == 200 || response.statusCode == 201) {
-      return;
+      final data = jsonDecode(utf8.decode(response.bodyBytes));
+      return data['id'] as int;
     } else if (response.statusCode == 400) {
       final data = jsonDecode(utf8.decode(response.bodyBytes));
       final message = _parseErrorMessage(data);
@@ -512,6 +562,92 @@ class ApiService {
       throw AuthBlockException();
     } else if (response.statusCode == 404) {
       throw AuthException('Пользователь не найден', 0);
+    }
+
+    throw AuthException('Ошибка сервера: ${response.statusCode}', 0);
+  }
+
+  Future<void> setMainPaymentCard(int cardId) async {
+    final url = Uri.parse("$baseUrl/client/card/$cardId");
+
+    final accessToken = await _securityService.getAccessToken();
+    if (accessToken == null) {
+      print("APISERVICE Error: Access token is null.");
+      throw UnauthorizedException();
+    }
+
+    print("SET MAIN CARD REQUEST:");
+    print("URL: $url");
+    print("BODY: { isMain: true }");
+
+    final response = await http.put(
+      url,
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": "Bearer $accessToken",
+      },
+      body: jsonEncode({
+        "isMain": true,
+      }),
+    );
+
+    print("SET MAIN CARD RESPONSE:");
+    print("STATUS: ${response.statusCode}");
+    print("BODY: ${response.body}");
+
+    if (response.statusCode == 200 || response.statusCode == 201) {
+      return;
+    } else if (response.statusCode == 400) {
+      final data = jsonDecode(utf8.decode(response.bodyBytes));
+      final message = _parseErrorMessage(data);
+      throw AuthException(message ?? 'Ошибка при установке основной карты', 0);
+    } else if (response.statusCode == 401) {
+      throw UnauthorizedException();
+    } else if (response.statusCode == 403) {
+      throw AuthBlockException();
+    } else if (response.statusCode == 404) {
+      throw AuthException('Карта не найдена', 0);
+    }
+
+    throw AuthException('Ошибка сервера: ${response.statusCode}', 0);
+  }
+
+  Future<void> removePaymentCard(int cardId) async {
+    final url = Uri.parse("$baseUrl/client/card/$cardId");
+
+    final accessToken = await _securityService.getAccessToken();
+    if (accessToken == null) {
+      print("APISERVICE Error: Access token is null.");
+      throw UnauthorizedException();
+    }
+
+    print("REMOVE CARD REQUEST:");
+    print("URL: $url");
+
+    final response = await http.delete(
+      url,
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": "Bearer $accessToken",
+      },
+    );
+
+    print("REMOVE CARD RESPONSE:");
+    print("STATUS: ${response.statusCode}");
+    print("BODY: ${response.body}");
+
+    if (response.statusCode == 200 || response.statusCode == 201 || response.statusCode == 204) {
+      return;
+    } else if (response.statusCode == 400) {
+      final data = jsonDecode(utf8.decode(response.bodyBytes));
+      final message = _parseErrorMessage(data);
+      throw AuthException(message ?? 'Ошибка при удалении карты', 0);
+    } else if (response.statusCode == 401) {
+      throw UnauthorizedException();
+    } else if (response.statusCode == 403) {
+      throw AuthBlockException();
+    } else if (response.statusCode == 404) {
+      throw AuthException('Карта не найдена', 0);
     }
 
     throw AuthException('Ошибка сервера: ${response.statusCode}', 0);
