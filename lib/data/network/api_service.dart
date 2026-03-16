@@ -459,6 +459,7 @@ class ApiService {
     required int expirationMonth,
     required int expirationYear,
     required String cvv,
+    required String cardHolder,
   }) async {
     final url = Uri.parse("$baseUrl/client/card");
 
@@ -478,7 +479,8 @@ class ApiService {
           "cardNumber: $cleanCardNumber, "
           "expirationMonth: $expirationMonth, "
           "expirationYear: $expirationYear, "
-          "cvv: ***"
+          "cvv: ***, "
+          "cardHolder: $cardHolder"
           "}",
     );
 
@@ -493,6 +495,7 @@ class ApiService {
         "expirationMonth": expirationMonth,
         "expirationYear": expirationYear,
         "cvv": cvv,
+        "cardHolder": cardHolder,
       }),
     );
 
@@ -512,6 +515,80 @@ class ApiService {
       throw AuthBlockException();
     } else if (response.statusCode == 404) {
       throw AuthException('Пользователь не найден', 0);
+    }
+
+    throw AuthException('Ошибка сервера: ${response.statusCode}', 0);
+  }
+
+  /// Получить профиль пользователя с картами
+  /// GET /client/me
+  Future<UserResponseDto?> getUserProfile() async {
+    final url = Uri.parse("$baseUrl/client/me");
+
+    final accessToken = await _securityService.getAccessToken();
+    if (accessToken == null) {
+      print("APISERVICE Error: Access token is null.");
+      return null;
+    }
+
+    final response = await http.get(
+      url,
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": "Bearer $accessToken",
+      },
+    );
+
+    print("GET USER PROFILE: ${response.statusCode}, ${response.body}");
+
+    if (response.statusCode == 200) {
+      final data = jsonDecode(utf8.decode(response.bodyBytes));
+      return UserResponseDto.fromJson(data);
+    } else if (response.statusCode == 401) {
+      throw UnauthorizedException();
+    } else if (response.statusCode == 403) {
+      throw AuthBlockException();
+    }
+
+    return null;
+  }
+
+  /// Установить карту основной
+  /// PUT /client/card/{id}
+  Future<void> setMainPaymentCard(int cardId) async {
+    final url = Uri.parse("$baseUrl/client/card/$cardId");
+
+    final accessToken = await _securityService.getAccessToken();
+    if (accessToken == null) {
+      print("APISERVICE Error: Access token is null.");
+      throw UnauthorizedException();
+    }
+
+    print("SET MAIN CARD REQUEST:");
+    print("URL: $url");
+    print("BODY: { isMain: true }");
+
+    final response = await http.put(
+      url,
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": "Bearer $accessToken",
+      },
+      body: jsonEncode({"isMain": true}),
+    );
+
+    print("SET MAIN CARD RESPONSE:");
+    print("STATUS: ${response.statusCode}");
+    print("BODY: ${response.body}");
+
+    if (response.statusCode == 200 || response.statusCode == 204) {
+      return;
+    } else if (response.statusCode == 401) {
+      throw UnauthorizedException();
+    } else if (response.statusCode == 403) {
+      throw AuthBlockException();
+    } else if (response.statusCode == 404) {
+      throw AuthException('Карта не найдена', 0);
     }
 
     throw AuthException('Ошибка сервера: ${response.statusCode}', 0);

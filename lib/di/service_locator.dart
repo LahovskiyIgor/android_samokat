@@ -26,6 +26,7 @@ import 'package:by_happy/domain/usecase/login_usecase.dart';
 import 'package:by_happy/domain/usecase/logout_usecase.dart';
 import 'package:by_happy/domain/usecase/refresh_token_usecase.dart';
 import 'package:by_happy/domain/usecase/save_map_settings_usecase.dart';
+import 'package:by_happy/domain/usecase/set_main_payment_card_usecase.dart'; // ← новый
 import 'package:by_happy/domain/usecase/update_profile_usecase.dart';
 import 'package:by_happy/domain/usecase/upload_profile_photo_usecase.dart';
 import 'package:by_happy/domain/usecase/verify_code_usecase.dart';
@@ -94,7 +95,7 @@ Future<void> setupDependencies() async {
 
   getIt.registerSingleton<AppSettingsRepository>(AppSettingsRepositoryImpl(getIt()));
 
-  getIt.registerSingleton<PaymentRepository>(PaymentRepositoryImpl(getIt()));
+  getIt.registerSingleton<PaymentRepository>(PaymentRepositoryImpl(getIt(), getIt()));
 
   // Use Cases
   getIt.registerSingleton<LoginUseCase>(LoginUseCase(getIt()));
@@ -127,8 +128,11 @@ Future<void> setupDependencies() async {
   getIt.registerSingleton<GetMapSettingsUsecase>(GetMapSettingsUsecase(getIt()));
   getIt.registerSingleton<SaveMapSettingsUsecase>(SaveMapSettingsUsecase(getIt()));
 
-  getIt.registerSingleton<AddPaymentCardUsecase>(AddPaymentCardUsecase(getIt()),
-  );
+  getIt.registerSingleton<AddPaymentCardUsecase>(AddPaymentCardUsecase(getIt()));
+
+  getIt.registerSingleton<GetPaymentCardsUsecase>(GetPaymentCardsUsecase(getIt()));
+
+  getIt.registerSingleton<SetMainPaymentCardUsecase>(SetMainPaymentCardUsecase(getIt()));
 
   // Blocs
   getIt.registerLazySingleton<SplashBloc>(() => SplashBloc(getIt()));

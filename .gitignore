@@ -1,12 +1,24 @@
 ```
-# Build artifacts
-*.dart_tool/
-*.build/
-build/
-
 # Dependencies
-.pub-cache/
-pubspec.lock
+.dart_tool/
+.build/
+.packages
+
+# Generated code
+lib/generated/
+
+# Logs
+*.log
+**/logs
+
+# Environment variables
+.env
+.env.local
+.env.*
+
+# OS generated files
+.DS_Store
+Thumbs.db
 
 # IDE files
 .idea/
@@ -14,20 +26,15 @@ pubspec.lock
 *.swp
 *.swo
 
-# Logs
-*.log
-
-# Environment
-.env
-.env.local
-*.env.*
-
 # Coverage
 coverage/
-*.lcov
+lcov.info
+
+# Build outputs
+build/
+dist/
 
 # Temporary files
 *.tmp
-.DS_Store
-Thumbs.db
+*.temp
 ```
