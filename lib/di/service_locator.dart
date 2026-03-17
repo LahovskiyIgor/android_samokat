@@ -32,6 +32,7 @@ import 'package:by_happy/domain/usecase/upload_profile_photo_usecase.dart';
 import 'package:by_happy/domain/usecase/verify_code_usecase.dart';
 import 'package:by_happy/presentation/viewmodel/add_card_bloc.dart'; // ← новый
 import 'package:by_happy/presentation/viewmodel/map_settings_modal_bloc.dart';
+import 'package:by_happy/presentation/viewmodel/payment_method_sheet_bloc.dart';
 import 'package:by_happy/presentation/viewmodel/pin_bloc.dart';
 import 'package:by_happy/presentation/viewmodel/profile_bloc.dart';
 import 'package:by_happy/presentation/viewmodel/scooter_detail_bloc.dart';
@@ -155,4 +156,6 @@ Future<void> setupDependencies() async {
   getIt.registerFactory<AddCardBloc>(() => AddCardBloc(getIt()));
 
   getIt.registerFactory<TariffSheetBloc>(() => TariffSheetBloc(getIt(), getIt()));
+
+  getIt.registerFactory<PaymentMethodSheetBloc>(() => PaymentMethodSheetBloc(getIt()));
 }
