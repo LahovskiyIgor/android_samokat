@@ -1,3 +1,5 @@
+import 'package:by_happy/domain/entities/payment_card.dart';
+import 'package:by_happy/domain/usecase/get_payment_cards_usecase.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../core/result.dart';
@@ -8,8 +10,9 @@ import '../state/tariff_sheet_state.dart';
 
 class TariffSheetBloc extends Bloc<TariffSheetEvent, TariffSheetState> {
   final GetAvailableTariffsUsecase _getAvailableTariffsUsecase;
+  final GetPaymentCardsUsecase _getPaymentCardsUsecase;
 
-  TariffSheetBloc(this._getAvailableTariffsUsecase)
+  TariffSheetBloc(this._getAvailableTariffsUsecase, this._getPaymentCardsUsecase)
       : super(TariffSheetState(status: TariffSheetStatus.initial)) {
     on<TariffSheetStarted>(_onStarted);
   }
@@ -22,11 +25,13 @@ class TariffSheetBloc extends Bloc<TariffSheetEvent, TariffSheetState> {
 
     try {
       final result = await _getAvailableTariffsUsecase(event.scooterId);
+      final cards_result = await _getPaymentCardsUsecase();
 
-      if (result is Success<List<Tariff>>) {
+      if (result is Success<List<Tariff>> && cards_result is Success<List<PaymentCard>>) {
         emit(state.copyWith(
           status: TariffSheetStatus.success,
           tariffs: result.data ?? [],
+          mainCard: cards_result.data?.firstWhere((element) => element.isMain)
         ));
       } else {
         emit(state.copyWith(

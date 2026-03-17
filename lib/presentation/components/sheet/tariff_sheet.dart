@@ -1,4 +1,5 @@
 import 'dart:ui';
+import 'package:by_happy/presentation/components/payment_option.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
@@ -224,7 +225,21 @@ class _TariffSheetState extends State<TariffSheet> {
 
                     const SizedBox(height: 16),
 
-                    // 🔹 КНОПКА "СПОСОБ ОПЛАТЫ"
+                    state.mainCard != null ?
+                      Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 20),
+                        child: PaymentOption(
+                          title: "Mastercard",  //добавить проверку по первой цифре
+                          subtitle: '****${state.mainCard!.cardLastNumber}',
+                          isSelected: true,
+                          onTap: () {
+                            setState(() {
+                              // _selectedPaymentMethod = index;
+                            });
+                          },
+                        ),
+                      ) :
+
                     Padding(
                       padding: const EdgeInsets.symmetric(horizontal: 20),
                       child: Container(

@@ -2,6 +2,7 @@ import 'dart:typed_data';
 import 'dart:ui' as ui;
 
 import 'package:by_happy/domain/usecase/get_map_settings_usecase.dart';
+import 'package:by_happy/domain/usecase/get_payment_cards_usecase.dart';
 import 'package:by_happy/domain/usecase/get_pedestrian_routes_usecase.dart';
 import 'package:by_happy/domain/usecase/get_scooter_usecase.dart';
 import 'package:by_happy/domain/usecase/save_map_settings_usecase.dart';
@@ -138,11 +139,8 @@ class _MapScreenState extends State<MapScreen> {
 
     if (scoot != null) {
 
-      // 3. Переходим на экран деталей и ЖДЕМ его закрытия
       final result = await context.push('/home/scooter/${scoot.id}');
 
-
-      // 4. Если из деталей вернулись с просьбой открыть вторую шторку
       if (result == true) {
         // Даем небольшую задержку, чтобы навигация завершилась корректно
         Future.delayed(Duration(milliseconds: 300), () {
@@ -152,7 +150,7 @@ class _MapScreenState extends State<MapScreen> {
             backgroundColor: Colors.transparent,
             isDismissible: true,
             builder: (context) => BlocProvider(
-              create: (context) => TariffSheetBloc(getIt<GetAvailableTariffsUsecase>()),
+              create: (context) => TariffSheetBloc(getIt<GetAvailableTariffsUsecase>(), getIt<GetPaymentCardsUsecase>()),
               child: TariffSheet(scooter: scoot),
             ),
           );

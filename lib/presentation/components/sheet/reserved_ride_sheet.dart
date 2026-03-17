@@ -1,0 +1,276 @@
+import 'dart:async';
+import 'dart:ui';
+import 'package:flutter/material.dart';
+import '../gradient_button.dart';
+import 'active_ride_sheet.dart';
+
+class ReservedRideSheet extends StatefulWidget {
+  final String scooterNumber;
+  final Duration initialReservationTime;
+
+  const ReservedRideSheet({
+    super.key,
+    required this.scooterNumber,
+    this.initialReservationTime = const Duration(minutes: 3, seconds: 17),
+  });
+
+  @override
+  State<ReservedRideSheet> createState() => _ReservedRideSheetState();
+}
+
+class _ReservedRideSheetState extends State<ReservedRideSheet> {
+  late Duration _reservationTime;
+  late Timer _timer;
+
+  @override
+  void initState() {
+    super.initState();
+    _reservationTime = widget.initialReservationTime;
+    _timer = Timer.periodic(const Duration(seconds: 1), (timer) {
+      if (mounted) {
+        setState(() {
+          _reservationTime = _reservationTime - const Duration(seconds: 1);
+          if (_reservationTime.isNegative) {
+            _reservationTime = Duration.zero;
+            timer.cancel();
+          }
+        });
+      }
+    });
+  }
+
+  @override
+  void dispose() {
+    _timer.cancel();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Align(
+      alignment: Alignment.bottomCenter,
+      child: ClipRRect(
+        borderRadius: const BorderRadius.vertical(top: Radius.circular(30)),
+        child: BackdropFilter(
+          filter: ImageFilter.blur(sigmaX: 20, sigmaY: 20),
+          child: Container(
+            padding: const EdgeInsets.only(top: 20, bottom: 10),
+            decoration: BoxDecoration(
+              color: const Color(0xFF000032).withOpacity(0.5),
+              borderRadius: const BorderRadius.vertical(top: Radius.circular(30)),
+            ),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                // HEADER
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 20),
+                  child: Row(
+                    children: [
+                      GestureDetector(
+                        onTap: () => Navigator.pop(context),
+                        child: Row(
+                          children: [
+                            Icon(
+                              Icons.arrow_back_ios_sharp,
+                              color: const Color(0x99FFFFFF),
+                              size: 20,
+                            ),
+                            Icon(
+                              Icons.arrow_back_ios_sharp,
+                              color: const Color(0x66FFFFFF),
+                              size: 20,
+                            ),
+                            Icon(
+                              Icons.arrow_back_ios_sharp,
+                              color: const Color(0x22FFFFFF),
+                              size: 20,
+                            ),
+                          ],
+                        ),
+                      ),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: Text(
+                          'Бесплатное бронирование',
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontSize: 16,
+                            fontWeight: FontWeight.w600,
+                          ),
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+
+                const SizedBox(height: 20),
+
+                // ТАЙМЕР + ИНФО О САМОКАТЕ (КОМПАКТНЫЙ)
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 20),
+                  child: Row(
+                    children: [
+                      // Таймер
+                      Expanded(
+                        flex: 2,
+                        child: Text(
+                          _formatDuration(_reservationTime),
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontSize: 32,
+                            fontWeight: FontWeight.bold,
+                            fontFeatures: [FontFeature.tabularFigures()],
+                            fontFamily: 'Digital Numbers',
+                          ),
+                        ),
+                      ),
+                      // Иконка и информация (ВЫСОКИЙ БЛОК)
+                      Expanded(
+                        flex: 3,
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 16), // ✅ Увеличен vertical padding
+                          decoration: BoxDecoration(
+                            color: Colors.white.withOpacity(0.1),
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          child: Row(
+                            children: [
+                              // Иконка самоката (ВЫШЕ)
+                              SizedBox(
+                                width: 44, // ✅ Чуть шире
+                                height: 56, // ✅ Значительно выше
+                                child: Image.asset(
+                                  'assets/icons/e6a5dcb6a3e2ec2362c25ea49509ab10d2312b19-reverse.png',
+                                  fit: BoxFit.contain,
+                                ),
+                              ),
+                              const SizedBox(width: 12),
+                              // Инфо
+                              Expanded(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    Row(
+                                      mainAxisSize: MainAxisSize.min,
+                                      children: [
+                                        Container(
+                                          width: 8,
+                                          height: 8,
+                                          decoration: const BoxDecoration(
+                                            color: Color(0xFFFFB800),
+                                            shape: BoxShape.circle,
+                                          ),
+                                        ),
+                                        const SizedBox(width: 6),
+                                        const Text(
+                                          'Забронирован',
+                                          style: TextStyle(
+                                            color: Colors.white,
+                                            fontSize: 12,
+                                            fontWeight: FontWeight.w600,
+                                          ),
+                                          overflow: TextOverflow.ellipsis,
+                                        ),
+                                      ],
+                                    ),
+                                    const SizedBox(height: 8), // ✅ Больше отступ
+                                    Text(
+                                      '№${widget.scooterNumber}',
+                                      style: const TextStyle(
+                                        color: Colors.white,
+                                        fontSize: 15, // ✅ Чуть больше
+                                        fontWeight: FontWeight.w600,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+
+                const SizedBox(height: 16),
+
+                // КНОПКА "НАЧАТЬ ПОЕЗДКУ"
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 20),
+                  child: GradientButton(
+                    text: 'Начать поездку',
+                    showArrows: true,
+                    height: 48,
+                    width: double.infinity,
+                    fontSize: 15,
+                    onTap: () {
+                      Navigator.pop(context);
+                      showModalBottomSheet(
+                        context: context,
+                        isScrollControlled: true,
+                        backgroundColor: Colors.transparent,
+                        builder: (context) => ActiveRideSheet(
+                          scooterNumber: widget.scooterNumber,
+                          initialElapsedTime: Duration.zero,
+                        ),
+                      );
+                    },
+                  ),
+                ),
+
+                const SizedBox(height: 12),
+
+                // КНОПКА "ОТМЕНИТЬ БРОНИРОВАНИЕ"
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 20),
+                  child: Container(
+                    height: 48,
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(24),
+                      border: Border.all(
+                        color: Colors.white.withOpacity(0.4),
+                        width: 1,
+                      ),
+                    ),
+                    child: Material(
+                      color: Colors.transparent,
+                      child: InkWell(
+                        onTap: () {
+                          Navigator.pop(context);
+                        },
+                        borderRadius: BorderRadius.circular(24),
+                        child: const Center(
+                          child: Text(
+                            'Отменить бронирование',
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontSize: 15,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+
+                const SizedBox(height: 20),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  String _formatDuration(Duration duration) {
+    String twoDigits(int n) => n.toString().padLeft(2, '0');
+    final minutes = twoDigits(duration.inMinutes.remainder(60));
+    final seconds = twoDigits(duration.inSeconds.remainder(60));
+    return '$minutes:$seconds';
+  }
+}

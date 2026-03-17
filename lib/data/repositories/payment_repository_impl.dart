@@ -2,6 +2,7 @@ import '../../core/failures.dart';
 import '../../core/result.dart';
 import '../../domain/entities/payment_card.dart';
 import '../../domain/repositories/payment_repository.dart';
+import '../../domain/service/security_service.dart';
 import '../network/api_service.dart';
 import '../exceptions/auth_exception.dart';
 import '../exceptions/auth_block_exception.dart';
@@ -10,7 +11,7 @@ import '../service/security_service_impl.dart';
 
 class PaymentRepositoryImpl implements PaymentRepository {
   final ApiService apiService;
-  final SecurityServiceImpl securityService;
+  final SecurityService securityService;
 
   PaymentRepositoryImpl(this.apiService, this.securityService);
 
