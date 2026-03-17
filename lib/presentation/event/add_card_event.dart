@@ -4,11 +4,13 @@ class AddCardSubmitted extends AddCardEvent {
   final String cardNumber;
   final String expiryDate;
   final String cvv;
+  final String cardHolder;
 
   AddCardSubmitted({
     required this.cardNumber,
     required this.expiryDate,
     required this.cvv,
+    required this.cardHolder,
   });
 }
 
@@ -28,4 +30,10 @@ class CvvChanged extends AddCardEvent {
   final String cvv;
 
   CvvChanged(this.cvv);
+}
+
+class CardHolderChanged extends AddCardEvent {
+  final String cardHolder;
+
+  CardHolderChanged(this.cardHolder);
 }
