@@ -5,6 +5,7 @@ class AddCardState {
   final String cardNumber;
   final String expiryDate;
   final String cvv;
+  final String cardHolder;
   final String errorMessage;
 
   const AddCardState({
@@ -12,6 +13,7 @@ class AddCardState {
     this.cardNumber = '',
     this.expiryDate = '',
     this.cvv = '',
+    this.cardHolder = '',
     this.errorMessage = '',
   });
 
@@ -20,6 +22,7 @@ class AddCardState {
     String? cardNumber,
     String? expiryDate,
     String? cvv,
+    String? cardHolder,
     String? errorMessage,
   }) {
     return AddCardState(
@@ -27,6 +30,7 @@ class AddCardState {
       cardNumber: cardNumber ?? this.cardNumber,
       expiryDate: expiryDate ?? this.expiryDate,
       cvv: cvv ?? this.cvv,
+      cardHolder: cardHolder ?? this.cardHolder,
       errorMessage: errorMessage ?? this.errorMessage,
     );
   }
@@ -35,6 +39,7 @@ class AddCardState {
     final cleanCardNumber = cardNumber.replaceAll(' ', '');
     return cleanCardNumber.length == 16 &&
         expiryDate.length == 5 &&
-        cvv.length == 3;
+        cvv.length == 3 &&
+        cardHolder.trim().isNotEmpty;
   }
 }

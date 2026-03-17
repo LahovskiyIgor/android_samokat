@@ -14,6 +14,7 @@ class AddCardBloc extends Bloc<AddCardEvent, AddCardState> {
     on<CardNumberChanged>(_onCardNumberChanged);
     on<ExpiryDateChanged>(_onExpiryDateChanged);
     on<CvvChanged>(_onCvvChanged);
+    on<CardHolderChanged>(_onCardHolderChanged);
     on<AddCardSubmitted>(_onAddCardSubmitted);
   }
 
@@ -30,6 +31,12 @@ class AddCardBloc extends Bloc<AddCardEvent, AddCardState> {
   void _onCvvChanged(CvvChanged event, Emitter<AddCardState> emit) {
     final formatted = event.cvv.replaceAll(RegExp(r'\D'), '').substring(0, 3);
     emit(state.copyWith(cvv: formatted));
+  }
+
+  void _onCardHolderChanged(CardHolderChanged event, Emitter<AddCardState> emit) {
+    // Разрешаем только буквы и пробелы, убираем лишние пробелы
+    final formatted = event.cardHolder.replaceAll(RegExp(r'[^a-zA-Zа-яА-ЯёЁ\s]'), '').trim();
+    emit(state.copyWith(cardHolder: formatted));
   }
 
   Future<void> _onAddCardSubmitted(AddCardSubmitted event, Emitter<AddCardState> emit) async {
@@ -57,6 +64,7 @@ class AddCardBloc extends Bloc<AddCardEvent, AddCardState> {
 
     final result = await addPaymentCardUsecase(
       cardNumber: event.cardNumber,
+      cardHolder: event.cardHolder,
       expiryMonth: expiryParts[0],
       expiryYear: expiryParts[1],
       cvv: event.cvv,

@@ -60,6 +60,7 @@ class AddCardScreen extends StatelessWidget {
                                     cardNumber: state.cardNumber,
                                     expiryDate: state.expiryDate,
                                     cvv: state.cvv,
+                                    cardHolder: state.cardHolder,
                                   ),
                                 );
                               }
@@ -192,6 +193,26 @@ class AddCardScreen extends StatelessWidget {
                 icon: Icons.credit_card,
                 onChanged: (value) {
                   context.read<AddCardBloc>().add(CardNumberChanged(value));
+                },
+              ),
+
+              const SizedBox(height: 20),
+
+              // Имя держателя карты
+              Text(
+                'Имя держателя карты',
+                style: TextStyle(
+                  color: Colors.white.withOpacity(0.6),
+                  fontSize: 13,
+                ),
+              ),
+              const SizedBox(height: 8),
+              _buildInputFieldText(
+                hintText: 'IVAN IVANOV',
+                value: state.cardHolder,
+                icon: Icons.person,
+                onChanged: (value) {
+                  context.read<AddCardBloc>().add(CardHolderChanged(value));
                 },
               ),
 
@@ -341,6 +362,57 @@ class AddCardScreen extends StatelessWidget {
                   color: Colors.white.withOpacity(0.3),
                   fontSize: 16,
                   letterSpacing: 2,
+                ),
+                border: InputBorder.none,
+                contentPadding: EdgeInsets.zero,
+              ),
+            ),
+          ),
+          const SizedBox(width: 12),
+          Icon(
+            icon,
+            color: Colors.white.withOpacity(0.5),
+            size: 22,
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildInputFieldText({
+    required String hintText,
+    required String value,
+    required IconData icon,
+    required ValueChanged<String> onChanged,
+  }) {
+    return Container(
+      height: 56,
+      padding: const EdgeInsets.symmetric(horizontal: 16),
+      decoration: BoxDecoration(
+        color: const Color(0xFF1A1F3E),
+        borderRadius: BorderRadius.circular(16),
+      ),
+      child: Row(
+        children: [
+          Expanded(
+            child: TextField(
+              onChanged: onChanged,
+              keyboardType: TextInputType.text,
+              textCapitalization: TextCapitalization.characters,
+              inputFormatters: [
+                LengthLimitingTextInputFormatter(50),
+              ],
+              style: const TextStyle(
+                color: Colors.white,
+                fontSize: 16,
+                letterSpacing: 1,
+              ),
+              decoration: InputDecoration(
+                hintText: hintText,
+                hintStyle: TextStyle(
+                  color: Colors.white.withOpacity(0.3),
+                  fontSize: 16,
+                  letterSpacing: 1,
                 ),
                 border: InputBorder.none,
                 contentPadding: EdgeInsets.zero,
