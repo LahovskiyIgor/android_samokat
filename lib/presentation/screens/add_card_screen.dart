@@ -103,10 +103,17 @@ class AddCardScreen extends StatelessWidget {
                             const SizedBox(height: 16),
 
                             // Имя и фамилия на карте
-                            CardInputField(
-                              hintText: 'Имя и фамилия на карте',
-                              keyboardType: TextInputType.text,
-                              textCapitalization: TextCapitalization.words,
+                            BlocBuilder<AddCardBloc, AddCardState>(
+                              builder: (context, state) {
+                                return CardInputField(
+                                  hintText: 'Имя и фамилия на карте',
+                                  keyboardType: TextInputType.text,
+                                  textCapitalization: TextCapitalization.words,
+                                  onChanged: (value) {
+                                    context.read<AddCardBloc>().add(CardHolderChanged(value));
+                                  },
+                                );
+                              },
                             ),
 
                             const SizedBox(height: 20),
@@ -130,6 +137,7 @@ class AddCardScreen extends StatelessWidget {
                                             cardNumber: state.cardNumber,
                                             expiryDate: state.expiryDate,
                                             cvv: state.cvv,
+                                            cardHolder: state.cardHolder,
                                           ),
                                         );
                                       }
