@@ -94,7 +94,7 @@ Future<void> setupDependencies() async {
 
   getIt.registerSingleton<AppSettingsRepository>(AppSettingsRepositoryImpl(getIt()));
 
-  getIt.registerSingleton<PaymentRepository>(PaymentRepositoryImpl(getIt()));
+  getIt.registerSingleton<PaymentRepository>(PaymentRepositoryImpl(getIt(), getIt()));
 
   // Use Cases
   getIt.registerSingleton<LoginUseCase>(LoginUseCase(getIt()));

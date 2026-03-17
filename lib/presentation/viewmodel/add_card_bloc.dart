@@ -59,6 +59,7 @@ class AddCardBloc extends Bloc<AddCardEvent, AddCardState> {
       cardNumber: event.cardNumber,
       expiryMonth: expiryParts[0],
       expiryYear: expiryParts[1],
+      cardHolder: "",
       cvv: event.cvv,
     );
 
