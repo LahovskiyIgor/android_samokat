@@ -14,6 +14,7 @@ import 'package:path/path.dart';
 
 import '../../domain/entities/user_profile.dart';
 import '../../domain/entities/payment_card.dart';
+import '../../domain/entities/scooter_order.dart';
 import '../models/scooters_response.dart';
 import '../models/tariffs_response.dart';
 import '../models/zones_response.dart';
@@ -648,6 +649,151 @@ class ApiService {
       throw AuthBlockException();
     } else if (response.statusCode == 404) {
       throw AuthException('Карта не найдена', 0);
+    }
+
+    throw AuthException('Ошибка сервера: ${response.statusCode}', 0);
+  }
+
+  Future<ScooterOrder?> bookScooter({
+    required int scooterId,
+    required int planId,
+    int? subscriptionId,
+    int? cardId,
+    required bool isBalance,
+    required bool isInsurance,
+  }) async {
+    final url = Uri.parse("$baseUrl/order/booking");
+
+    final accessToken = await _securityService.getAccessToken();
+    if (accessToken == null) {
+      print("APISERVICE Error: Access token is null.");
+      throw UnauthorizedException();
+    }
+
+    print("BOOK SCOOTER REQUEST:");
+    print("URL: $url");
+    print(
+      "BODY: { "
+      "scooterId: $scooterId, "
+      "planId: $planId, "
+      "subscriptionId: $subscriptionId, "
+      "cardId: $cardId, "
+      "isBalance: $isBalance, "
+      "isInsurance: $isInsurance "
+      "}",
+    );
+
+    final response = await http.post(
+      url,
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": "Bearer $accessToken",
+      },
+      body: jsonEncode({
+        "scooterId": scooterId,
+        "planId": planId,
+        "subscriptionId": subscriptionId,
+        "cardId": cardId,
+        "isBalance": isBalance,
+        "isInsurance": isInsurance,
+      }),
+    );
+
+    print("BOOK SCOOTER RESPONSE:");
+    print("STATUS: ${response.statusCode}");
+    print("BODY: ${response.body}");
+
+    if (response.statusCode == 201 || response.statusCode == 200) {
+      final data = jsonDecode(utf8.decode(response.bodyBytes));
+      return ScooterOrder.fromJson(data);
+    } else if (response.statusCode == 400) {
+      final data = jsonDecode(utf8.decode(response.bodyBytes));
+      final message = _parseErrorMessage(data);
+      throw AuthException(message ?? 'Ошибка при бронировании самоката', 0);
+    } else if (response.statusCode == 401) {
+      throw UnauthorizedException();
+    } else if (response.statusCode == 403) {
+      throw AuthBlockException();
+    }
+
+    throw AuthException('Ошибка сервера: ${response.statusCode}', 0);
+  }
+
+  Future<ScooterOrder?> startRide(int orderId) async {
+    final url = Uri.parse("$baseUrl/order/$orderId/start");
+
+    final accessToken = await _securityService.getAccessToken();
+    if (accessToken == null) {
+      print("APISERVICE Error: Access token is null.");
+      throw UnauthorizedException();
+    }
+
+    print("START RIDE REQUEST:");
+    print("URL: $url");
+
+    final response = await http.put(
+      url,
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": "Bearer $accessToken",
+      },
+    );
+
+    print("START RIDE RESPONSE:");
+    print("STATUS: ${response.statusCode}");
+    print("BODY: ${response.body}");
+
+    if (response.statusCode == 200 || response.statusCode == 201) {
+      final data = jsonDecode(utf8.decode(response.bodyBytes));
+      return ScooterOrder.fromJson(data);
+    } else if (response.statusCode == 400) {
+      final data = jsonDecode(utf8.decode(response.bodyBytes));
+      final message = _parseErrorMessage(data);
+      throw AuthException(message ?? 'Ошибка при начале поездки', 0);
+    } else if (response.statusCode == 401) {
+      throw UnauthorizedException();
+    } else if (response.statusCode == 403) {
+      throw AuthBlockException();
+    }
+
+    throw AuthException('Ошибка сервера: ${response.statusCode}', 0);
+  }
+
+  Future<ScooterOrder?> cancelRide(int orderId) async {
+    final url = Uri.parse("$baseUrl/order/$orderId/cancel");
+
+    final accessToken = await _securityService.getAccessToken();
+    if (accessToken == null) {
+      print("APISERVICE Error: Access token is null.");
+      throw UnauthorizedException();
+    }
+
+    print("CANCEL RIDE REQUEST:");
+    print("URL: $url");
+
+    final response = await http.put(
+      url,
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": "Bearer $accessToken",
+      },
+    );
+
+    print("CANCEL RIDE RESPONSE:");
+    print("STATUS: ${response.statusCode}");
+    print("BODY: ${response.body}");
+
+    if (response.statusCode == 200 || response.statusCode == 201) {
+      final data = jsonDecode(utf8.decode(response.bodyBytes));
+      return ScooterOrder.fromJson(data);
+    } else if (response.statusCode == 400) {
+      final data = jsonDecode(utf8.decode(response.bodyBytes));
+      final message = _parseErrorMessage(data);
+      throw AuthException(message ?? 'Ошибка при отмене поездки', 0);
+    } else if (response.statusCode == 401) {
+      throw UnauthorizedException();
+    } else if (response.statusCode == 403) {
+      throw AuthBlockException();
     }
 
     throw AuthException('Ошибка сервера: ${response.statusCode}', 0);
