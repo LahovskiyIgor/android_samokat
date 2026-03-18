@@ -160,7 +160,10 @@ class _MapScreenState extends State<MapScreen> {
     }
 
     if (isBooking ?? false) {
-      showModalBottomSheet(context: context, builder: (context) => CurrentRidesSheet(),);
+      showModalBottomSheet(
+        context: context,
+        builder: (context) => CurrentRidesSheet(clientId: 1), // TODO: получить реальный clientId из профиля
+      );
     }
   }
 

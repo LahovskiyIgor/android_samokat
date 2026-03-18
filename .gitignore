@@ -1,40 +1,44 @@
-# Dependencies
-.pub/
+```
+# Dart/Flutter specific
 .dart_tool/
+.packages
+.pub-cache/
+pubspec.lock
+
+# Build outputs
 build/
+**/build/
+
+# IDE files
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# Logs
+*.log
+*.tmp
 
 # Environment
 .env
 .env.local
-.env.*
+*.env.*
 
-# Logs
-*.log
+# Dependencies
+node_modules/
+**/node_modules/
 
 # OS generated files
 .DS_Store
 Thumbs.db
 
-# IDE files
-.vscode/
-.idea/
-*.swp
-*.swo
-
 # Coverage
 coverage/
-lcov.info
+htmlcov/
+.coverage
 
-# Temporary files
-*.tmp
-*.temp
-
-# Distribution
-dist/
-bin/
-
-# Cache
-.cache/
+# Cache directories
+__pycache__/
 .mypy_cache/
 .pytest_cache/
 .gradle/
@@ -63,3 +67,4 @@ target/
 *.tar.bz2
 *.tar.xz
 *.tar.zst
+```

@@ -18,6 +18,7 @@ import 'package:by_happy/domain/usecase/get_address_by_point_usecase.dart';
 import 'package:by_happy/domain/usecase/get_available_scooters_usecase.dart';
 import 'package:by_happy/domain/usecase/get_available_tariffs_usecase.dart';
 import 'package:by_happy/domain/usecase/get_available_zones_usecase.dart';
+import 'package:by_happy/domain/usecase/get_client_orders_usecase.dart';
 import 'package:by_happy/domain/usecase/get_map_settings_usecase.dart';
 import 'package:by_happy/domain/usecase/get_payment_cards_usecase.dart';
 import 'package:by_happy/domain/usecase/get_pedestrian_routes_usecase.dart';
@@ -31,6 +32,7 @@ import 'package:by_happy/domain/usecase/update_profile_usecase.dart';
 import 'package:by_happy/domain/usecase/upload_profile_photo_usecase.dart';
 import 'package:by_happy/domain/usecase/verify_code_usecase.dart';
 import 'package:by_happy/presentation/viewmodel/add_card_bloc.dart'; // ← новый
+import 'package:by_happy/presentation/viewmodel/current_rides_bloc.dart';
 import 'package:by_happy/presentation/viewmodel/map_settings_modal_bloc.dart';
 import 'package:by_happy/presentation/viewmodel/payment_method_sheet_bloc.dart';
 import 'package:by_happy/presentation/viewmodel/pin_bloc.dart';
@@ -132,6 +134,8 @@ Future<void> setupDependencies() async {
   getIt.registerSingleton<AddPaymentCardUsecase>(AddPaymentCardUsecase(getIt()));
   getIt.registerSingleton<GetPaymentCardsUsecase>(GetPaymentCardsUsecase(getIt(), getIt()));
 
+  getIt.registerSingleton<GetClientOrdersUsecase>(GetClientOrdersUsecase(getIt()));
+
   // Blocs
   getIt.registerLazySingleton<SplashBloc>(() => SplashBloc(getIt()));
 
@@ -158,4 +162,6 @@ Future<void> setupDependencies() async {
   getIt.registerFactory<TariffSheetBloc>(() => TariffSheetBloc(getIt(), getIt()));
 
   getIt.registerFactory<PaymentMethodSheetBloc>(() => PaymentMethodSheetBloc(getIt()));
+
+  getIt.registerFactory<CurrentRidesBloc>(() => CurrentRidesBloc(getIt()));
 }
