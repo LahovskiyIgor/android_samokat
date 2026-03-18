@@ -8,24 +8,24 @@ class TariffSheetState {
   final TariffSheetStatus status;
   final List<Tariff> tariffs;
   final String? errorMessage;
-  final PaymentCard? mainCard;
+  final PaymentCard? selectedCard;
 
   TariffSheetState({
     this.status = TariffSheetStatus.initial,
     this.tariffs = const [],
-    this.mainCard,
+    this.selectedCard,
     this.errorMessage,
   });
 
   TariffSheetState copyWith({
     TariffSheetStatus? status,
     List<Tariff>? tariffs,
-    PaymentCard? mainCard,
+    PaymentCard? selectedCard,
     String? errorMessage,
   }) => TariffSheetState(
     status: status ?? this.status,
     tariffs: tariffs ?? this.tariffs,
-    mainCard: mainCard ?? this.mainCard,
+    selectedCard: selectedCard ?? this.selectedCard,
     errorMessage: errorMessage ?? this.errorMessage,
   );
 }

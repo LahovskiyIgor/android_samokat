@@ -1,10 +1,14 @@
 import 'dart:ui';
 import 'package:by_happy/presentation/components/payment_option.dart';
+import 'package:by_happy/presentation/components/sheet/payment_method_sheet.dart';
+import 'package:by_happy/presentation/viewmodel/payment_method_sheet_bloc.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
+import '../../../di/service_locator.dart';
 import '../../../domain/entities/scooter.dart';
 import '../../../domain/entities/tariff.dart';
+import '../../../domain/usecase/get_payment_cards_usecase.dart';
 import '../../event/tariff_sheet_event.dart';
 import '../../state/tariff_sheet_state.dart';
 import '../../viewmodel/tariff_sheet_bloc.dart';
@@ -225,14 +229,24 @@ class _TariffSheetState extends State<TariffSheet> {
 
                     const SizedBox(height: 16),
 
-                    state.mainCard != null ?
+                    state.selectedCard != null ?
                       Padding(
                         padding: const EdgeInsets.symmetric(horizontal: 20),
                         child: PaymentOption(
-                          title: "Mastercard",  //добавить проверку по первой цифре
-                          subtitle: '****${state.mainCard!.cardLastNumber}',
+                          title: _getCardType(state.selectedCard?.fullCardNumber ?? state.selectedCard!.cardLastNumber),  //добавить проверку по первой цифре
+                          subtitle: '****${state.selectedCard!.cardLastNumber}',
                           isSelected: true,
                           onTap: () {
+                            showModalBottomSheet(
+                                context: context,
+                                isScrollControlled: true,
+                                backgroundColor: Colors.transparent,
+                                isDismissible: true,
+                                builder: (context) => BlocProvider(
+                                  create: (context) => PaymentMethodSheetBloc(getIt<GetPaymentCardsUsecase>()),
+                                  child: PaymentMethodSheet(),
+                                ),
+                            );
                             setState(() {
                               // _selectedPaymentMethod = index;
                             });
@@ -305,12 +319,16 @@ class _TariffSheetState extends State<TariffSheet> {
                         height: 56,
                         width: double.infinity,
                         fontSize: 16,
-                        enabled: _selectedTariffIndex != null && _hasPaymentCard,
-                        onTap: (_selectedTariffIndex != null && _hasPaymentCard)
+                        enabled: true/*_selectedTariffIndex != null && state.selectedCard != null*/,
+                        onTap: () {Navigator.pop(context, true);}
+
+                        /*(_selectedTariffIndex != null && state.selectedCard != null)
                             ? () {
                           // TODO: Забронировать самокат
+                          //usecase booking
+                          Navigator.pop(context, true);
                         }
-                            : null,
+                            : null,*/
                       ),
                     ),
                   ],
@@ -321,6 +339,21 @@ class _TariffSheetState extends State<TariffSheet> {
         );
       },
     );
+  }
+
+  String _getCardType(String lastNumber) {
+    if (lastNumber.isEmpty) return 'Card';
+    final firstDigit = lastNumber[0];
+    switch (firstDigit) {
+      case '4':
+        return 'Visa';
+      case '5':
+        return 'Mastercard';
+      case '9':
+        return 'BelCard';
+      default:
+        return 'Card';
+    }
   }
 }
 
@@ -428,4 +461,6 @@ class _TariffCard extends StatelessWidget {
       ),
     );
   }
+
+
 }

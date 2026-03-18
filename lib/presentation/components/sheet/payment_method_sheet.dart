@@ -1,10 +1,11 @@
 import 'dart:ui';
+import 'package:by_happy/presentation/event/tariff_sheet_event.dart';
+import 'package:by_happy/presentation/viewmodel/tariff_sheet_bloc.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:by_happy/presentation/components/payment_option.dart';
 
-import '../../domain/entities/payment_card.dart';
 import '../../event/payment_method_sheet_event.dart';
 import '../../state/payment_method_sheet_state.dart';
 import '../../viewmodel/payment_method_sheet_bloc.dart';
@@ -157,9 +158,12 @@ class _PaymentMethodSheetState extends State<PaymentMethodSheet> {
                               subtitle: '${state.balance.toStringAsFixed(2)} BYN',
                               isSelected: _selectedPaymentMethod == null,
                               onTap: () {
+
                                 setState(() {
                                   _selectedPaymentMethod = null;
                                 });
+
+                                Navigator.pop(context);
                               },
                             ),
 
@@ -172,13 +176,17 @@ class _PaymentMethodSheetState extends State<PaymentMethodSheet> {
                               return Padding(
                                 padding: const EdgeInsets.only(bottom: 12),
                                 child: PaymentOption(
-                                  title: _getCardType(card.cardLastNumber),
+                                  title: _getCardType(card.fullCardNumber ?? card.cardLastNumber),
                                   subtitle: '****${card.cardLastNumber}',
                                   isSelected: _selectedPaymentMethod == index,
                                   onTap: () {
+                                    context.read<TariffSheetBloc>().add(PaymentCardChanged(entry.value));
+
                                     setState(() {
                                       _selectedPaymentMethod = index;
                                     });
+
+                                    Navigator.pop(context, "balance");
                                   },
                                 ),
                               );

@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:by_happy/domain/entities/payment_card.dart';
 import 'package:by_happy/domain/usecase/get_payment_cards_usecase.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -15,6 +17,7 @@ class TariffSheetBloc extends Bloc<TariffSheetEvent, TariffSheetState> {
   TariffSheetBloc(this._getAvailableTariffsUsecase, this._getPaymentCardsUsecase)
       : super(TariffSheetState(status: TariffSheetStatus.initial)) {
     on<TariffSheetStarted>(_onStarted);
+    on<PaymentCardChanged>(_onPaymentCardChanged);
   }
 
   Future<void> _onStarted(
@@ -31,7 +34,7 @@ class TariffSheetBloc extends Bloc<TariffSheetEvent, TariffSheetState> {
         emit(state.copyWith(
           status: TariffSheetStatus.success,
           tariffs: result.data ?? [],
-          mainCard: cards_result.data?.firstWhere((element) => element.isMain)
+          selectedCard: cards_result.data?.firstWhere((element) => element.isMain)
         ));
       } else {
         emit(state.copyWith(
@@ -45,5 +48,22 @@ class TariffSheetBloc extends Bloc<TariffSheetEvent, TariffSheetState> {
         errorMessage: e.toString(),
       ));
     }
+  }
+
+  FutureOr<void> _onPaymentCardChanged(PaymentCardChanged event, Emitter<TariffSheetState> emit) {
+    try {
+      emit(
+        state.copyWith(
+          status: TariffSheetStatus.success,
+          selectedCard: event.card
+        )
+      );
+    } catch (e) {
+      emit(state.copyWith(
+        status: TariffSheetStatus.failure,
+        errorMessage: 'Failed to change card',
+      ));
+    }
+
   }
 }

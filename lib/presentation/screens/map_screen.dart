@@ -7,6 +7,7 @@ import 'package:by_happy/domain/usecase/get_pedestrian_routes_usecase.dart';
 import 'package:by_happy/domain/usecase/get_scooter_usecase.dart';
 import 'package:by_happy/domain/usecase/save_map_settings_usecase.dart';
 import 'package:by_happy/presentation/components/map_icon_painter/clusterized_icon_painter.dart';
+import 'package:by_happy/presentation/components/sheet/current_rides_sheet.dart';
 import 'package:by_happy/presentation/components/sheet/map_settings_sheet.dart';
 import 'package:by_happy/presentation/components/sheet/tariff_sheet.dart';
 import 'package:by_happy/presentation/event/map_settings_modal_event.dart';
@@ -136,15 +137,15 @@ class _MapScreenState extends State<MapScreen> {
         );
       },
     );
-
+    bool? isBooking = false;
     if (scoot != null) {
 
       final result = await context.push('/home/scooter/${scoot.id}');
 
       if (result == true) {
         // Даем небольшую задержку, чтобы навигация завершилась корректно
-        Future.delayed(Duration(milliseconds: 300), () {
-          showModalBottomSheet(
+        await Future.delayed(Duration(milliseconds: 300), () async {
+          isBooking = await showModalBottomSheet<bool>(
             context: context,
             isScrollControlled: true,
             backgroundColor: Colors.transparent,
@@ -156,6 +157,10 @@ class _MapScreenState extends State<MapScreen> {
           );
         });
       }
+    }
+
+    if (isBooking ?? false) {
+      showModalBottomSheet(context: context, builder: (context) => CurrentRidesSheet(),);
     }
   }
 
