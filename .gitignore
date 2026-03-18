@@ -1,33 +1,65 @@
-```
 # Dependencies
+.pub/
 .dart_tool/
-.build/
-.dependencies/
+build/
 
-# Generated code
-lib/generated/
-
-# IDE files
-.idea/
-.vscode/
-*.iml
-*.ipr
-*.iws
-
-# OS files
-.DS_Store
-Thumbs.db
+# Environment
+.env
+.env.local
+.env.*
 
 # Logs
 *.log
+
+# OS generated files
+.DS_Store
+Thumbs.db
+
+# IDE files
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Coverage
+coverage/
+lcov.info
 
 # Temporary files
 *.tmp
 *.temp
 
-# Flutter/Dart specific
-.packages
-pubspec.lock
-**/ios/.generated/
-**/android/.generated/
-```
+# Distribution
+dist/
+bin/
+
+# Cache
+.cache/
+.mypy_cache/
+.pytest_cache/
+.gradle/
+target/
+
+# Compressed files
+*.zip
+*.gz
+*.tar
+*.tgz
+*.bz2
+*.xz
+*.7z
+*.rar
+*.zst
+*.lz4
+*.lzh
+*.cab
+*.arj
+*.rpm
+*.deb
+*.Z
+*.lz
+*.lzo
+*.tar.gz
+*.tar.bz2
+*.tar.xz
+*.tar.zst
