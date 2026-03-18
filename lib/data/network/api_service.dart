@@ -958,4 +958,43 @@ class ApiService {
 
     throw AuthException('Ошибка сервера: ${response.statusCode}', 0);
   }
+
+  Future<List<ScooterOrder>> getClientOrders(int clientId) async {
+    final url = Uri.parse("$baseUrl/order/$clientId/client");
+
+    final accessToken = await _securityService.getAccessToken();
+    if (accessToken == null) {
+      print("APISERVICE Error: Access token is null.");
+      throw UnauthorizedException();
+    }
+
+    print("GET CLIENT ORDERS REQUEST:");
+    print("URL: $url");
+
+    final response = await http.get(
+      url,
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": "Bearer $accessToken",
+      },
+    );
+
+    print("GET CLIENT ORDERS RESPONSE:");
+    print("STATUS: ${response.statusCode}");
+    print("BODY: ${response.body}");
+
+    if (response.statusCode == 200) {
+      final data = jsonDecode(utf8.decode(response.bodyBytes));
+      if (data is List) {
+        return data.map((json) => ScooterOrder.fromJson(json)).toList();
+      }
+      return [];
+    } else if (response.statusCode == 401) {
+      throw UnauthorizedException();
+    } else if (response.statusCode == 403) {
+      throw AuthBlockException();
+    }
+
+    throw Exception('Ошибка сервера: ${response.statusCode}');
+  }
 }
