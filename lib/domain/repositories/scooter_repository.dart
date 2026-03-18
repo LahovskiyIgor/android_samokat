@@ -18,4 +18,8 @@ abstract class ScooterRepository {
   });
   Future<Result<ScooterOrder>> startRide(int orderId);
   Future<Result<ScooterOrder>> cancelRide(int orderId);
+  Future<Result<ScooterOrder>> pauseRide(int orderId);
+  Future<Result<ScooterOrder>> resumeRide(int orderId);
+  Future<Result<ScooterOrder>> finishRide(int orderId);
+  Future<Result<ScooterOrder>> payRide(int orderId);
 }

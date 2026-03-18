@@ -149,4 +149,76 @@ class ScooterRepositoryImpl extends ScooterRepository {
     }
     return result;
   }
+
+  @override
+  Future<Result<ScooterOrder>> pauseRide(int orderId) async {
+    late final Result<ScooterOrder> result;
+    try {
+      final order = await _apiService.pauseRide(orderId);
+      if (order != null) {
+        result = Success(order);
+      } else {
+        result = Failure(UnknownFailure());
+      }
+    } on AuthException catch (e) {
+      result = Failure(AuthFailure(e.attemptsLeft));
+    } catch (e) {
+      result = Failure(UnknownFailure());
+    }
+    return result;
+  }
+
+  @override
+  Future<Result<ScooterOrder>> resumeRide(int orderId) async {
+    late final Result<ScooterOrder> result;
+    try {
+      final order = await _apiService.resumeRide(orderId);
+      if (order != null) {
+        result = Success(order);
+      } else {
+        result = Failure(UnknownFailure());
+      }
+    } on AuthException catch (e) {
+      result = Failure(AuthFailure(e.attemptsLeft));
+    } catch (e) {
+      result = Failure(UnknownFailure());
+    }
+    return result;
+  }
+
+  @override
+  Future<Result<ScooterOrder>> finishRide(int orderId) async {
+    late final Result<ScooterOrder> result;
+    try {
+      final order = await _apiService.finishRide(orderId);
+      if (order != null) {
+        result = Success(order);
+      } else {
+        result = Failure(UnknownFailure());
+      }
+    } on AuthException catch (e) {
+      result = Failure(AuthFailure(e.attemptsLeft));
+    } catch (e) {
+      result = Failure(UnknownFailure());
+    }
+    return result;
+  }
+
+  @override
+  Future<Result<ScooterOrder>> payRide(int orderId) async {
+    late final Result<ScooterOrder> result;
+    try {
+      final order = await _apiService.payRide(orderId);
+      if (order != null) {
+        result = Success(order);
+      } else {
+        result = Failure(UnknownFailure());
+      }
+    } on AuthException catch (e) {
+      result = Failure(AuthFailure(e.attemptsLeft));
+    } catch (e) {
+      result = Failure(UnknownFailure());
+    }
+    return result;
+  }
 }
