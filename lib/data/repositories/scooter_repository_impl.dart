@@ -4,6 +4,7 @@ import '../../core/failures.dart';
 import '../../core/result.dart';
 import '../../domain/entities/scooter.dart';
 import '../../domain/entities/tariff.dart';
+import '../../domain/entities/scooter_order.dart';
 import '../exceptions/auth_exception.dart';
 import '../network/api_service.dart';
 
@@ -75,6 +76,74 @@ class ScooterRepositoryImpl extends ScooterRepository {
       } else {
         result = Failure(UnknownFailure());
       }
+    } catch (e) {
+      result = Failure(UnknownFailure());
+    }
+    return result;
+  }
+
+  @override
+  Future<Result<ScooterOrder>> bookScooter({
+    required int scooterId,
+    required int planId,
+    int? subscriptionId,
+    int? cardId,
+    required bool isBalance,
+    required bool isInsurance,
+  }) async {
+    late final Result<ScooterOrder> result;
+    try {
+      final order = await _apiService.bookScooter(
+        scooterId: scooterId,
+        planId: planId,
+        subscriptionId: subscriptionId,
+        cardId: cardId,
+        isBalance: isBalance,
+        isInsurance: isInsurance,
+      );
+      if (order != null) {
+        result = Success(order);
+      } else {
+        result = Failure(UnknownFailure());
+      }
+    } on AuthException catch (e) {
+      result = Failure(AuthFailure(e.attemptsLeft));
+    } catch (e) {
+      result = Failure(UnknownFailure());
+    }
+    return result;
+  }
+
+  @override
+  Future<Result<ScooterOrder>> startRide(int orderId) async {
+    late final Result<ScooterOrder> result;
+    try {
+      final order = await _apiService.startRide(orderId);
+      if (order != null) {
+        result = Success(order);
+      } else {
+        result = Failure(UnknownFailure());
+      }
+    } on AuthException catch (e) {
+      result = Failure(AuthFailure(e.attemptsLeft));
+    } catch (e) {
+      result = Failure(UnknownFailure());
+    }
+    return result;
+  }
+
+  @override
+  Future<Result<ScooterOrder>> cancelRide(int orderId) async {
+    late final Result<ScooterOrder> result;
+    try {
+      final order = await _apiService.cancelRide(orderId);
+      if (order != null) {
+        result = Success(order);
+      } else {
+        result = Failure(UnknownFailure());
+      }
+    } on AuthException catch (e) {
+      result = Failure(AuthFailure(e.attemptsLeft));
     } catch (e) {
       result = Failure(UnknownFailure());
     }
