@@ -35,6 +35,7 @@ import 'package:by_happy/domain/usecase/verify_code_usecase.dart';
 import 'package:by_happy/domain/usecase/upload_scooter_photos_usecase.dart';
 import 'package:by_happy/domain/usecase/update_scooter_order_data_usecase.dart';
 import 'package:by_happy/domain/usecase/pay_scooter_order_with_photos_usecase.dart';
+import 'package:by_happy/domain/usecase/get_scooter_order_by_id_usecase.dart';
 import 'package:by_happy/presentation/viewmodel/add_card_bloc.dart'; // ← новый
 import 'package:by_happy/presentation/viewmodel/current_rides_bloc.dart';
 import 'package:by_happy/presentation/viewmodel/map_settings_modal_bloc.dart';
@@ -150,6 +151,7 @@ Future<void> setupDependencies() async {
   getIt.registerSingleton<UploadScooterPhotosUsecase>(UploadScooterPhotosUsecase(getIt()));
   getIt.registerSingleton<UpdateScooterOrderDataUsecase>(UpdateScooterOrderDataUsecase(getIt()));
   getIt.registerSingleton<PayScooterOrderWithPhotosUsecase>(PayScooterOrderWithPhotosUsecase(getIt()));
+  getIt.registerSingleton<GetScooterOrderByIdUsecase>(GetScooterOrderByIdUsecase(getIt()));
 
   // Blocs
   getIt.registerLazySingleton<SplashBloc>(() => SplashBloc(getIt()));
