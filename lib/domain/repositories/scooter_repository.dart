@@ -1,4 +1,6 @@
 
+import 'dart:io';
+
 import '../../core/result.dart';
 import '../entities/scooter.dart';
 import '../entities/tariff.dart';
