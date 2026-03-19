@@ -1020,5 +1020,157 @@ class ApiService {
     throw Exception('Ошибка сервера: ${response.statusCode}');
   }
 
+  Future<List<int>> uploadScooterPhotos(List<File> images) async {
+    final url = Uri.parse("$baseUrl/scooterorder/upload");
+    String? accessToken = await _securityService.getAccessToken();
+
+    if (accessToken == null) {
+      throw Exception("Authentication token not found.");
+    }
+
+    var request = http.MultipartRequest("POST", url);
+    request.headers.addAll({"Authorization": "Bearer $accessToken"});
+
+    for (var imageFile in images) {
+      var stream = http.ByteStream(DelegatingStream.typed(imageFile.openRead()));
+      var length = await imageFile.length();
+
+      final mimeTypeData = lookupMimeType(
+        imageFile.path,
+        headerBytes: [0xFF, 0xD8],
+      )?.split('/');
+
+      var multipartFile = http.MultipartFile(
+        'files',
+        stream,
+        length,
+        filename: basename(imageFile.path),
+        contentType: MediaType(mimeTypeData![0], mimeTypeData[1]),
+      );
+
+      request.files.add(multipartFile);
+    }
+
+    print("SENDING SCOOTER PHOTOS...");
+    print("URL: $url");
+    print("FILES COUNT: ${images.length}");
+
+    try {
+      final streamedResponse = await request.send();
+      final response = await http.Response.fromStream(streamedResponse);
+
+      print("STATUS: ${response.statusCode}");
+      print("RESPONSE: ${response.body}");
+
+      if (response.statusCode >= 200 && response.statusCode < 300) {
+        final data = jsonDecode(response.body);
+        // Предполагаем, что сервер возвращает массив id загруженных файлов
+        if (data is List) {
+          return data.map((item) => item as int).toList();
+        } else if (data is Map<String, dynamic> && data['filesId'] is List) {
+          return (data['filesId'] as List).map((item) => item as int).toList();
+        }
+        throw Exception("Unexpected response format from server");
+      } else {
+        throw Exception("Failed to upload scooter photos: ${response.statusCode}");
+      }
+    } catch (e) {
+      print("ERROR during scooter photos upload: $e");
+      rethrow;
+    }
+  }
+
+  Future<ScooterOrder?> updateScooterOrderData({
+    required int orderId,
+    Map<String, dynamic>? data,
+  }) async {
+    final url = Uri.parse("$baseUrl/scooterorder/$orderId/data");
+
+    final accessToken = await _securityService.getAccessToken();
+    if (accessToken == null) {
+      print("APISERVICE Error: Access token is null.");
+      throw UnauthorizedException();
+    }
+
+    print("UPDATE SCOOTER ORDER DATA REQUEST:");
+    print("URL: $url");
+    print("DATA: $data");
+
+    final response = await http.put(
+      url,
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": "Bearer $accessToken",
+      },
+      body: data != null ? jsonEncode(data) : null,
+    );
+
+    print("UPDATE SCOOTER ORDER DATA RESPONSE:");
+    print("STATUS: ${response.statusCode}");
+    print("BODY: ${response.body}");
+
+    if (response.statusCode == 200 || response.statusCode == 201) {
+      final responseData = jsonDecode(utf8.decode(response.bodyBytes));
+      return ScooterOrder.fromJson(responseData);
+    } else if (response.statusCode == 400) {
+      final responseData = jsonDecode(utf8.decode(response.bodyBytes));
+      final message = _parseErrorMessage(responseData);
+      throw AuthException(message ?? 'Ошибка при обновлении данных заказа', 0);
+    } else if (response.statusCode == 401) {
+      throw UnauthorizedException();
+    } else if (response.statusCode == 403) {
+      throw AuthBlockException();
+    }
+
+    throw AuthException('Ошибка сервера: ${response.statusCode}', 0);
+  }
+
+  Future<ScooterOrder?> payScooterOrderWithPhotos({
+    required int orderId,
+    required List<int> filesId,
+  }) async {
+    final url = Uri.parse("$baseUrl/scooterorder/$orderId/pay");
+
+    final accessToken = await _securityService.getAccessToken();
+    if (accessToken == null) {
+      print("APISERVICE Error: Access token is null.");
+      throw UnauthorizedException();
+    }
+
+    print("PAY SCOOTER ORDER WITH PHOTOS REQUEST:");
+    print("URL: $url");
+    print("FILES ID: $filesId");
+
+    final requestBody = {"filesId": filesId};
+
+    final response = await http.put(
+      url,
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": "Bearer $accessToken",
+      },
+      body: jsonEncode(requestBody),
+    );
+
+    print("PAY SCOOTER ORDER WITH PHOTOS RESPONSE:");
+    print("STATUS: ${response.statusCode}");
+    print("BODY: ${response.body}");
+
+    if (response.statusCode == 200 || response.statusCode == 201) {
+      final responseData = jsonDecode(utf8.decode(response.bodyBytes));
+      return ScooterOrder.fromJson(responseData);
+    } else if (response.statusCode == 400) {
+      final responseData = jsonDecode(utf8.decode(response.bodyBytes));
+      final message = _parseErrorMessage(responseData);
+      throw AuthException(message ?? 'Ошибка при оплате заказа с фото', 0);
+    } else if (response.statusCode == 401) {
+      throw UnauthorizedException();
+    } else if (response.statusCode == 403) {
+      throw AuthBlockException();
+    }
+
+    throw AuthException('Ошибка сервера: ${response.statusCode}', 0);
+  }
+
 
 }

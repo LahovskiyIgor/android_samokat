@@ -23,4 +23,13 @@ abstract class ScooterRepository {
   Future<Result<ScooterOrder>> finishRide(int orderId);
   Future<Result<ScooterOrder>> payRide(int orderId);
   Future<Result<List<ScooterOrder>>> getClientOrders();
+  Future<Result<List<int>>> uploadScooterPhotos(List<File> images);
+  Future<Result<ScooterOrder>> updateScooterOrderData({
+    required int orderId,
+    Map<String, dynamic>? data,
+  });
+  Future<Result<ScooterOrder>> payScooterOrderWithPhotos({
+    required int orderId,
+    required List<int> filesId,
+  });
 }

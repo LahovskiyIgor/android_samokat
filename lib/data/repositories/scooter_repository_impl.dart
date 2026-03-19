@@ -1,3 +1,4 @@
+import 'dart:io';
 import 'package:by_happy/domain/repositories/scooter_repository.dart';
 
 import '../../core/failures.dart';
@@ -228,6 +229,68 @@ class ScooterRepositoryImpl extends ScooterRepository {
     try {
       final orders = await _apiService.getClientOrders();
       result = Success(orders);
+    } on AuthException catch (e) {
+      result = Failure(AuthFailure(e.attemptsLeft));
+    } catch (e) {
+      result = Failure(UnknownFailure());
+    }
+    return result;
+  }
+
+  @override
+  Future<Result<List<int>>> uploadScooterPhotos(List<File> images) async {
+    late final Result<List<int>> result;
+    try {
+      final filesId = await _apiService.uploadScooterPhotos(images);
+      result = Success(filesId);
+    } on AuthException catch (e) {
+      result = Failure(AuthFailure(e.attemptsLeft));
+    } catch (e) {
+      result = Failure(UnknownFailure());
+    }
+    return result;
+  }
+
+  @override
+  Future<Result<ScooterOrder>> updateScooterOrderData({
+    required int orderId,
+    Map<String, dynamic>? data,
+  }) async {
+    late final Result<ScooterOrder> result;
+    try {
+      final order = await _apiService.updateScooterOrderData(
+        orderId: orderId,
+        data: data,
+      );
+      if (order != null) {
+        result = Success(order);
+      } else {
+        result = Failure(UnknownFailure());
+      }
+    } on AuthException catch (e) {
+      result = Failure(AuthFailure(e.attemptsLeft));
+    } catch (e) {
+      result = Failure(UnknownFailure());
+    }
+    return result;
+  }
+
+  @override
+  Future<Result<ScooterOrder>> payScooterOrderWithPhotos({
+    required int orderId,
+    required List<int> filesId,
+  }) async {
+    late final Result<ScooterOrder> result;
+    try {
+      final order = await _apiService.payScooterOrderWithPhotos(
+        orderId: orderId,
+        filesId: filesId,
+      );
+      if (order != null) {
+        result = Success(order);
+      } else {
+        result = Failure(UnknownFailure());
+      }
     } on AuthException catch (e) {
       result = Failure(AuthFailure(e.attemptsLeft));
     } catch (e) {
