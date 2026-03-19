@@ -1125,6 +1125,42 @@ class ApiService {
     throw AuthException('Ошибка сервера: ${response.statusCode}', 0);
   }
 
+  Future<ScooterOrder?> getScooterOrderById({required int id}) async {
+    final url = Uri.parse("$baseUrl/scooterorder/$id");
+
+    final accessToken = await _securityService.getAccessToken();
+    if (accessToken == null) {
+      print("APISERVICE Error: Access token is null.");
+      throw UnauthorizedException();
+    }
+
+    print("GET SCOOTER ORDER BY ID REQUEST:");
+    print("URL: $url");
+
+    final response = await http.get(
+      url,
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": "Bearer $accessToken",
+      },
+    );
+
+    print("GET SCOOTER ORDER BY ID RESPONSE:");
+    print("STATUS: ${response.statusCode}");
+    print("BODY: ${response.body}");
+
+    if (response.statusCode == 200 || response.statusCode == 201) {
+      final responseData = jsonDecode(utf8.decode(response.bodyBytes));
+      return ScooterOrder.fromJson(responseData);
+    } else if (response.statusCode == 401) {
+      throw UnauthorizedException();
+    } else if (response.statusCode == 403) {
+      throw AuthBlockException();
+    }
+
+    throw Exception('Ошибка сервера: ${response.statusCode}');
+  }
+
   Future<ScooterOrder?> payScooterOrderWithPhotos({
     required int orderId,
     required List<int> filesId,

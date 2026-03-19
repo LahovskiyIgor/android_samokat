@@ -298,4 +298,22 @@ class ScooterRepositoryImpl extends ScooterRepository {
     }
     return result;
   }
+
+  @override
+  Future<Result<ScooterOrder>> getScooterOrderById(int id) async {
+    late final Result<ScooterOrder> result;
+    try {
+      final order = await _apiService.getScooterOrderById(id: id);
+      if (order != null) {
+        result = Success(order);
+      } else {
+        result = Failure(UnknownFailure());
+      }
+    } on AuthException catch (e) {
+      result = Failure(AuthFailure(e.attemptsLeft));
+    } catch (e) {
+      result = Failure(UnknownFailure());
+    }
+    return result;
+  }
 }

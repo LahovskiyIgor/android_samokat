@@ -32,4 +32,5 @@ abstract class ScooterRepository {
     required int orderId,
     required List<int> filesId,
   });
+  Future<Result<ScooterOrder>> getScooterOrderById(int id);
 }
