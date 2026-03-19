@@ -43,6 +43,8 @@ import 'package:by_happy/presentation/viewmodel/splash_bloc.dart';
 import 'package:by_happy/presentation/viewmodel/tariff_sheet_bloc.dart';
 import 'package:by_happy/domain/usecase/cancel_ride_usecase.dart';
 import 'package:by_happy/domain/usecase/start_ride_usecase.dart';
+import 'package:by_happy/domain/usecase/pause_ride_usecase.dart';
+import 'package:by_happy/domain/usecase/finish_ride_usecase.dart';
 import 'package:by_happy/presentation/viewmodel/reserved_ride_bloc.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:get_it/get_it.dart';
@@ -143,6 +145,8 @@ Future<void> setupDependencies() async {
 
   getIt.registerSingleton<StartRideUsecase>(StartRideUsecase(getIt()));
   getIt.registerSingleton<CancelRideUsecase>(CancelRideUsecase(getIt()));
+  getIt.registerSingleton<PauseRideUsecase>(PauseRideUsecase(getIt()));
+  getIt.registerSingleton<FinishRideUsecase>(FinishRideUsecase(getIt()));
 
   // Blocs
   getIt.registerLazySingleton<SplashBloc>(() => SplashBloc(getIt()));
@@ -174,4 +178,6 @@ Future<void> setupDependencies() async {
   getIt.registerFactory<CurrentRidesBloc>(() => CurrentRidesBloc(getIt()));
 
   getIt.registerFactory<ReservedRideBloc>(() => ReservedRideBloc(getIt(), getIt()));
+
+  getIt.registerFactory<ActiveRideBloc>(() => ActiveRideBloc(getIt(), getIt()));
 }

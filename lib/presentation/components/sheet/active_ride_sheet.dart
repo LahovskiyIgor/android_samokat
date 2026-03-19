@@ -1,14 +1,21 @@
 import 'dart:async';
 import 'dart:ui';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import '../../../di/service_locator.dart';
+import '../../event/active_ride_event.dart';
+import '../../state/active_ride_state.dart';
+import '../../viewmodel/active_ride_bloc.dart';
 
 class ActiveRideSheet extends StatefulWidget {
   final String scooterNumber;
+  final int orderId;
   final Duration initialElapsedTime;
 
   const ActiveRideSheet({
     super.key,
     required this.scooterNumber,
+    required this.orderId,
     this.initialElapsedTime = Duration.zero,
   });
 
@@ -17,6 +24,7 @@ class ActiveRideSheet extends StatefulWidget {
 }
 
 class _ActiveRideSheetState extends State<ActiveRideSheet> {
+  late final ActiveRideBloc _bloc;
   late Duration _elapsedTime;
   double _speed = 12.3;
   double _distance = 3.8;
@@ -26,6 +34,7 @@ class _ActiveRideSheetState extends State<ActiveRideSheet> {
   @override
   void initState() {
     super.initState();
+    _bloc = getIt<ActiveRideBloc>();
     _elapsedTime = widget.initialElapsedTime;
     _timer = Timer.periodic(const Duration(seconds: 1), (timer) {
       if (mounted) {
@@ -39,189 +48,248 @@ class _ActiveRideSheetState extends State<ActiveRideSheet> {
   @override
   void dispose() {
     _timer.cancel();
+    _bloc.close();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
-    return Align(
-      alignment: Alignment.bottomCenter,
-      child: ClipRRect(
-        borderRadius: const BorderRadius.vertical(top: Radius.circular(30)),
-        child: BackdropFilter(
-          filter: ImageFilter.blur(sigmaX: 20, sigmaY: 20),
-          child: Container(
-            padding: const EdgeInsets.only(top: 20, bottom: 10),
-            decoration: BoxDecoration(
-              // ✅ Более прозрачный фон менюшки
-              color: const Color(0x00000032).withOpacity(0.6),
-              borderRadius: const BorderRadius.vertical(top: Radius.circular(30)),
-            ),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 20),
-                  child: Row(
-                    children: [
-                      GestureDetector(
-                        onTap: () => Navigator.pop(context),
-                        child: Row(
-                          children: [
-                            Icon(
-                              Icons.arrow_back_ios_sharp,
-                              color: const Color(0x99FFFFFF),
-                              size: 20,
-                            ),
-                            Icon(
-                              Icons.arrow_back_ios_sharp,
-                              color: const Color(0x66FFFFFF),
-                              size: 20,
-                            ),
-                            Icon(
-                              Icons.arrow_back_ios_sharp,
-                              color: const Color(0x22FFFFFF),
-                              size: 20,
-                            ),
-                          ],
+    return BlocProvider.value(
+      value: _bloc,
+      child: Align(
+        alignment: Alignment.bottomCenter,
+        child: ClipRRect(
+          borderRadius: const BorderRadius.vertical(top: Radius.circular(30)),
+          child: BackdropFilter(
+            filter: ImageFilter.blur(sigmaX: 20, sigmaY: 20),
+            child: Container(
+              padding: const EdgeInsets.only(top: 20, bottom: 10),
+              decoration: BoxDecoration(
+                // ✅ Более прозрачный фон менюшки
+                color: const Color(0x00000032).withOpacity(0.6),
+                borderRadius: const BorderRadius.vertical(top: Radius.circular(30)),
+              ),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 20),
+                    child: Row(
+                      children: [
+                        GestureDetector(
+                          onTap: () => Navigator.pop(context),
+                          child: Row(
+                            children: [
+                              Icon(
+                                Icons.arrow_back_ios_sharp,
+                                color: const Color(0x99FFFFFF),
+                                size: 20,
+                              ),
+                              Icon(
+                                Icons.arrow_back_ios_sharp,
+                                color: const Color(0x66FFFFFF),
+                                size: 20,
+                              ),
+                              Icon(
+                                Icons.arrow_back_ios_sharp,
+                                color: const Color(0x22FFFFFF),
+                                size: 20,
+                              ),
+                            ],
+                          ),
                         ),
-                      ),
-                      const SizedBox(width: 12),
-                      Expanded(
-                        child: Text(
-                          'Самокат ${widget.scooterNumber}',
+                        const SizedBox(width: 12),
+                        Expanded(
+                          child: Text(
+                            'Самокат ${widget.scooterNumber}',
+                            style: const TextStyle(
+                              color: Colors.white,
+                              fontSize: 16,
+                              fontWeight: FontWeight.w600,
+                            ),
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+
+                  const SizedBox(height: 20),
+
+                  // 🔹 ТАЙМЕР
+                  Container(
+                    width: double.infinity,
+                    margin: const EdgeInsets.symmetric(horizontal: 20),
+                    padding: const EdgeInsets.symmetric(vertical: 16),
+                    decoration: BoxDecoration(
+                      // ✅ Белый фон с прозрачностью 0.15
+                      color: Colors.white.withOpacity(0.15),
+                      borderRadius: BorderRadius.circular(16),
+                    ),
+                    child: Column(
+                      children: [
+                        Text(
+                          _formatDuration(_elapsedTime),
                           style: const TextStyle(
                             color: Colors.white,
-                            fontSize: 16,
-                            fontWeight: FontWeight.w600,
+                            fontSize: 32,
+                            fontWeight: FontWeight.bold,
+                            fontFeatures: [FontFeature.tabularFigures()],
+                            fontFamily: 'Digital Numbers',
                           ),
-                          overflow: TextOverflow.ellipsis,
                         ),
-                      ),
-                    ],
-                  ),
-                ),
-
-                const SizedBox(height: 20),
-
-                // 🔹 ТАЙМЕР
-                Container(
-                  width: double.infinity,
-                  margin: const EdgeInsets.symmetric(horizontal: 20),
-                  padding: const EdgeInsets.symmetric(vertical: 16),
-                  decoration: BoxDecoration(
-                    // ✅ Белый фон с прозрачностью 0.15
-                    color: Colors.white.withOpacity(0.15),
-                    borderRadius: BorderRadius.circular(16),
-                  ),
-                  child: Column(
-                    children: [
-                      Text(
-                        _formatDuration(_elapsedTime),
-                        style: const TextStyle(
-                          color: Colors.white,
-                          fontSize: 32,
-                          fontWeight: FontWeight.bold,
-                          fontFeatures: [FontFeature.tabularFigures()],
-                          fontFamily: 'Digital Numbers',
-                        ),
-                      ),
-                      const SizedBox(height: 4),
-                      Text(
-                        'время в пути',
-                        style: TextStyle(
-                          color: Colors.white.withOpacity(0.6),
-                          fontSize: 13,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-
-                const SizedBox(height: 20),
-
-                // 🔹 КНОПКИ УПРАВЛЕНИЯ
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 20),
-                  child: Row(
-                    children: [
-                      Expanded(
-                        child: Container(
-                          height: 56,
-                          decoration: BoxDecoration(
-                            gradient: const LinearGradient(
-                              colors: [Color(0xFF66E3C4), Color(0xFF4CD1B5)],
-                            ),
-                            borderRadius: BorderRadius.circular(16),
+                        const SizedBox(height: 4),
+                        Text(
+                          'время в пути',
+                          style: TextStyle(
+                            color: Colors.white.withOpacity(0.6),
+                            fontSize: 13,
                           ),
-                          child: Material(
-                            color: Colors.transparent,
-                            child: InkWell(
-                              onTap: () {
-                                // TODO: Пауза
-                              },
-                              borderRadius: BorderRadius.circular(16),
-                              child: Column(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: [
-                                  const Icon(
-                                    Icons.pause,
-                                    color: Color(0xFF0A0F2E),
-                                    size: 24,
+                        ),
+                      ],
+                    ),
+                  ),
+
+                  const SizedBox(height: 20),
+
+                  // 🔹 КНОПКИ УПРАВЛЕНИЯ
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 20),
+                    child: Row(
+                      children: [
+                        Expanded(
+                          child: BlocListener<ActiveRideBloc, ActiveRideState>(
+                            listener: (context, state) {
+                              if (state.ridePaused) {
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  const SnackBar(content: Text('Поездка на паузе')),
+                                );
+                              } else if (state.status == ActiveRideStatus.failure) {
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  SnackBar(content: Text(state.errorMessage ?? 'Ошибка')),
+                                );
+                              }
+                            },
+                            child: Container(
+                              height: 56,
+                              decoration: BoxDecoration(
+                                gradient: const LinearGradient(
+                                  colors: [Color(0xFF66E3C4), Color(0xFF4CD1B5)],
+                                ),
+                                borderRadius: BorderRadius.circular(16),
+                              ),
+                              child: Material(
+                                color: Colors.transparent,
+                                child: InkWell(
+                                  onTap: () {
+                                    _bloc.add(PauseRide(widget.orderId));
+                                  },
+                                  borderRadius: BorderRadius.circular(16),
+                                  child: BlocBuilder<ActiveRideBloc, ActiveRideState>(
+                                    builder: (context, state) {
+                                      if (state.status == ActiveRideStatus.loading) {
+                                        return const Center(
+                                          child: SizedBox(
+                                            width: 20,
+                                            height: 20,
+                                            child: CircularProgressIndicator(
+                                              color: Color(0xFF0A0F2E),
+                                              strokeWidth: 2,
+                                            ),
+                                          ),
+                                        );
+                                      }
+                                      return Column(
+                                        mainAxisAlignment: MainAxisAlignment.center,
+                                        children: [
+                                          const Icon(
+                                            Icons.pause,
+                                            color: Color(0xFF0A0F2E),
+                                            size: 24,
+                                          ),
+                                          const SizedBox(height: 4),
+                                          const Text(
+                                            'ПАУЗА',
+                                            style: TextStyle(
+                                              color: Color(0xFF0A0F2E),
+                                              fontSize: 12,
+                                              fontWeight: FontWeight.w600,
+                                            ),
+                                          ),
+                                        ],
+                                      );
+                                    },
                                   ),
-                                  const SizedBox(height: 4),
-                                  const Text(
-                                    'ПАУЗА',
-                                    style: TextStyle(
-                                      color: Color(0xFF0A0F2E),
-                                      fontSize: 12,
-                                      fontWeight: FontWeight.w600,
-                                    ),
-                                  ),
-                                ],
+                                ),
                               ),
                             ),
                           ),
                         ),
-                      ),
-                      const SizedBox(width: 12),
-                      Expanded(
-                        child: Container(
-                          height: 56,
-                          decoration: BoxDecoration(
-                            color: const Color(0xFFB84949),
-                            borderRadius: BorderRadius.circular(16),
-                          ),
-                          child: Material(
-                            color: Colors.transparent,
-                            child: InkWell(
-                              onTap: () {
-                                // TODO: Завершить поездку
-                              },
-                              borderRadius: BorderRadius.circular(16),
-                              child: Column(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: [
-                                  const Icon(
-                                    Icons.stop,
-                                    color: Colors.white,
-                                    size: 24,
+                        const SizedBox(width: 12),
+                        Expanded(
+                          child: BlocListener<ActiveRideBloc, ActiveRideState>(
+                            listener: (context, state) {
+                              if (state.rideFinished) {
+                                Navigator.pop(context);
+                              } else if (state.status == ActiveRideStatus.failure) {
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  SnackBar(content: Text(state.errorMessage ?? 'Ошибка')),
+                                );
+                              }
+                            },
+                            child: Container(
+                              height: 56,
+                              decoration: BoxDecoration(
+                                color: const Color(0xFFB84949),
+                                borderRadius: BorderRadius.circular(16),
+                              ),
+                              child: Material(
+                                color: Colors.transparent,
+                                child: InkWell(
+                                  onTap: () {
+                                    _bloc.add(FinishRide(widget.orderId));
+                                  },
+                                  borderRadius: BorderRadius.circular(16),
+                                  child: BlocBuilder<ActiveRideBloc, ActiveRideState>(
+                                    builder: (context, state) {
+                                      if (state.status == ActiveRideStatus.loading) {
+                                        return const Center(
+                                          child: SizedBox(
+                                            width: 20,
+                                            height: 20,
+                                            child: CircularProgressIndicator(
+                                              color: Colors.white,
+                                              strokeWidth: 2,
+                                            ),
+                                          ),
+                                        );
+                                      }
+                                      return Column(
+                                        mainAxisAlignment: MainAxisAlignment.center,
+                                        children: [
+                                          const Icon(
+                                            Icons.stop,
+                                            color: Colors.white,
+                                            size: 24,
+                                          ),
+                                          const SizedBox(height: 4),
+                                          const Text(
+                                            'ЗАВЕРШИТЬ',
+                                            style: TextStyle(
+                                              color: Colors.white,
+                                              fontSize: 12,
+                                              fontWeight: FontWeight.w600,
+                                            ),
+                                          ),
+                                        ],
+                                      );
+                                    },
                                   ),
-                                  const SizedBox(height: 4),
-                                  const Text(
-                                    'ЗАВЕРШИТЬ',
-                                    style: TextStyle(
-                                      color: Colors.white,
-                                      fontSize: 12,
-                                      fontWeight: FontWeight.w600,
-                                    ),
-                                  ),
-                                ],
+                                ),
                               ),
                             ),
                           ),
                         ),
-                      ),
                       const SizedBox(width: 12),
                       Expanded(
                         child: Container(
