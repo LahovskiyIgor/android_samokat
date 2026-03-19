@@ -340,6 +340,7 @@ class _RideCardState extends State<_RideCard> {
                           isScrollControlled: true,
                           backgroundColor: Colors.transparent,
                           builder: (context) => ReservedRideSheet(
+                            orderId: widget.order.id,
                             scooterNumber: scooterNumber,
                             initialReservationTime: _reservationTime - _elapsedTime,
                           ),

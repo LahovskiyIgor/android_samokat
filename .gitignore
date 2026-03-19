@@ -1,70 +1,64 @@
 ```
-# Dart/Flutter specific
-.dart_tool/
+# Dependencies
+.pub/
+.build/
 .packages
-.pub-cache/
-pubspec.lock
 
-# Build outputs
-build/
-**/build/
+# Generated code
+lib/**/*.g.dart
+lib/**/*.freezed.dart
 
-# IDE files
+# Logs
+*.log
+**/logs
+
+# Environment
+.env
+.env.local
+.env.*
+
+# IDE
 .idea/
 .vscode/
 *.swp
 *.swo
 
-# Logs
-*.log
-*.tmp
-
-# Environment
-.env
-.env.local
-*.env.*
-
-# Dependencies
-node_modules/
-**/node_modules/
-
-# OS generated files
+# OS
 .DS_Store
 Thumbs.db
 
 # Coverage
 coverage/
 htmlcov/
-.coverage
 
-# Cache directories
-__pycache__/
-.mypy_cache/
-.pytest_cache/
-.gradle/
+# Build outputs
+build/
+dist/
 target/
 
-# Compressed files
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+*.so
+
+# Virtual environments
+venv/
+.venv/
+env/
+ENV/
+
+# Compressed archives
 *.zip
+*.tar.gz
+*.tar.bz2
+*.tar.xz
 *.gz
-*.tar
-*.tgz
 *.bz2
 *.xz
 *.7z
 *.rar
 *.zst
-*.lz4
-*.lzh
-*.cab
-*.arj
-*.rpm
-*.deb
-*.Z
-*.lz
-*.lzo
-*.tar.gz
-*.tar.bz2
-*.tar.xz
-*.tar.zst
 ```
