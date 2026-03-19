@@ -1,6 +1,7 @@
 import 'dart:typed_data';
 import 'dart:ui' as ui;
 
+import 'package:by_happy/domain/usecase/book_scooter_usecase.dart';
 import 'package:by_happy/domain/usecase/get_map_settings_usecase.dart';
 import 'package:by_happy/domain/usecase/get_payment_cards_usecase.dart';
 import 'package:by_happy/domain/usecase/get_pedestrian_routes_usecase.dart';
@@ -151,7 +152,7 @@ class _MapScreenState extends State<MapScreen> {
             backgroundColor: Colors.transparent,
             isDismissible: true,
             builder: (context) => BlocProvider(
-              create: (context) => TariffSheetBloc(getIt<GetAvailableTariffsUsecase>(), getIt<GetPaymentCardsUsecase>()),
+              create: (context) => TariffSheetBloc(getIt<GetAvailableTariffsUsecase>(), getIt<GetPaymentCardsUsecase>(), getIt<BookScooterUsecase>()),
               child: TariffSheet(scooter: scoot),
             ),
           );
@@ -162,7 +163,7 @@ class _MapScreenState extends State<MapScreen> {
     if (isBooking ?? false) {
       showModalBottomSheet(
         context: context,
-        builder: (context) => CurrentRidesSheet(clientId: 1), // TODO: получить реальный clientId из профиля
+        builder: (context) => CurrentRidesSheet(clientId: 1),
       );
     }
   }
@@ -186,7 +187,10 @@ class _MapScreenState extends State<MapScreen> {
   }
 
   void _onNotificationTap() {
-
+    showModalBottomSheet(
+      context: context,
+      builder: (context) => CurrentRidesSheet(clientId: 1),
+    );
   }
 
 

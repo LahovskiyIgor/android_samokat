@@ -45,14 +45,16 @@ class _TariffSheetState extends State<TariffSheet> {
           return Align(
             alignment: Alignment.bottomCenter,
             child: ClipRRect(
-              borderRadius: const BorderRadius.vertical(top: Radius.circular(30)),
+              borderRadius: const BorderRadius.vertical(
+                  top: Radius.circular(30)),
               child: BackdropFilter(
                 filter: ImageFilter.blur(sigmaX: 20, sigmaY: 20),
                 child: Container(
                   height: 520,
                   decoration: BoxDecoration(
                     color: const Color(0xFF000032).withOpacity(0.88),
-                    borderRadius: const BorderRadius.vertical(top: Radius.circular(30)),
+                    borderRadius: const BorderRadius.vertical(
+                        top: Radius.circular(30)),
                   ),
                   child: const Center(
                     child: CircularProgressIndicator(color: Colors.white),
@@ -67,14 +69,16 @@ class _TariffSheetState extends State<TariffSheet> {
           return Align(
             alignment: Alignment.bottomCenter,
             child: ClipRRect(
-              borderRadius: const BorderRadius.vertical(top: Radius.circular(30)),
+              borderRadius: const BorderRadius.vertical(
+                  top: Radius.circular(30)),
               child: BackdropFilter(
                 filter: ImageFilter.blur(sigmaX: 20, sigmaY: 20),
                 child: Container(
                   height: 520,
                   decoration: BoxDecoration(
                     color: const Color(0xFF000032).withOpacity(0.88),
-                    borderRadius: const BorderRadius.vertical(top: Radius.circular(30)),
+                    borderRadius: const BorderRadius.vertical(
+                        top: Radius.circular(30)),
                   ),
                   child: Center(
                     child: Text(
@@ -99,7 +103,8 @@ class _TariffSheetState extends State<TariffSheet> {
                 padding: const EdgeInsets.only(top: 20, bottom: 10),
                 decoration: BoxDecoration(
                   color: const Color(0xFF000032).withOpacity(0.88),
-                  borderRadius: const BorderRadius.vertical(top: Radius.circular(30)),
+                  borderRadius: const BorderRadius.vertical(
+                      top: Radius.circular(30)),
                 ),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -170,7 +175,8 @@ class _TariffSheetState extends State<TariffSheet> {
                               ),
                               child: Row(
                                 children: [
-                                  MiniBatteryIndicator(percent: widget.scooter.batteryLevel),
+                                  MiniBatteryIndicator(
+                                      percent: widget.scooter.batteryLevel),
                                   const SizedBox(width: 12),
                                   Expanded(
                                     child: Text(
@@ -209,8 +215,10 @@ class _TariffSheetState extends State<TariffSheet> {
                                 currency: tariff.currency,
                                 subtitle: 'Старт поездки',
                                 details: [
-                                  'Далее  ${tariff.drivePrice.toStringAsFixed(2)} ${tariff.currency}/мин.',
-                                  'Минута на паузе  ${tariff.pausePrice.toStringAsFixed(0)} ${tariff.currency}',
+                                  'Далее  ${tariff.drivePrice.toStringAsFixed(
+                                      2)} ${tariff.currency}/мин.',
+                                  'Минута на паузе  ${tariff.pausePrice
+                                      .toStringAsFixed(0)} ${tariff.currency}',
                                 ],
                                 isSelected: _selectedTariffIndex == index,
                                 onTap: () {
@@ -230,29 +238,35 @@ class _TariffSheetState extends State<TariffSheet> {
                     const SizedBox(height: 16),
 
                     state.selectedCard != null ?
-                      Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 20),
-                        child: PaymentOption(
-                          title: _getCardType(state.selectedCard?.fullCardNumber ?? state.selectedCard!.cardLastNumber),  //добавить проверку по первой цифре
-                          subtitle: '****${state.selectedCard!.cardLastNumber}',
-                          isSelected: true,
-                          onTap: () {
-                            showModalBottomSheet(
-                                context: context,
-                                isScrollControlled: true,
-                                backgroundColor: Colors.transparent,
-                                isDismissible: true,
-                                builder: (context) => BlocProvider(
-                                  create: (context) => PaymentMethodSheetBloc(getIt<GetPaymentCardsUsecase>()),
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 20),
+                      child: PaymentOption(
+                        title: _getCardType(state.selectedCard
+                            ?.fullCardNumber ??
+                            state.selectedCard!.cardLastNumber),
+                        //добавить проверку по первой цифре
+                        subtitle: '****${state.selectedCard!.cardLastNumber}',
+                        isSelected: true,
+                        onTap: () {
+                          showModalBottomSheet(
+                            context: context,
+                            isScrollControlled: true,
+                            backgroundColor: Colors.transparent,
+                            isDismissible: true,
+                            builder: (context) =>
+                                BlocProvider(
+                                  create: (context) =>
+                                      PaymentMethodSheetBloc(
+                                          getIt<GetPaymentCardsUsecase>()),
                                   child: PaymentMethodSheet(),
                                 ),
-                            );
-                            setState(() {
-                              // _selectedPaymentMethod = index;
-                            });
-                          },
-                        ),
-                      ) :
+                          );
+                          setState(() {
+                            // _selectedPaymentMethod = index;
+                          });
+                        },
+                      ),
+                    ) :
 
                     Padding(
                       padding: const EdgeInsets.symmetric(horizontal: 20),
@@ -269,7 +283,22 @@ class _TariffSheetState extends State<TariffSheet> {
                           color: Colors.transparent,
                           child: InkWell(
                             onTap: () {
-                              // TODO: Открыть экран выбора способа оплаты
+                              showModalBottomSheet(
+                                context: context,
+                                isScrollControlled: true,
+                                backgroundColor: Colors.transparent,
+                                isDismissible: true,
+                                builder: (context) =>
+                                    BlocProvider(
+                                      create: (context) =>
+                                          PaymentMethodSheetBloc(
+                                              getIt<GetPaymentCardsUsecase>()),
+                                      child: PaymentMethodSheet(),
+                                    ),
+                              );
+                              setState(() {
+                                // _selectedPaymentMethod = index;
+                              });
                             },
                             borderRadius: BorderRadius.circular(24),
                             child: Center(
@@ -319,16 +348,18 @@ class _TariffSheetState extends State<TariffSheet> {
                         height: 56,
                         width: double.infinity,
                         fontSize: 16,
-                        enabled: true/*_selectedTariffIndex != null && state.selectedCard != null*/,
-                        onTap: () {Navigator.pop(context, true);}
-
-                        /*(_selectedTariffIndex != null && state.selectedCard != null)
+                        enabled: _selectedTariffIndex != null &&
+                            state.selectedCard != null,
+                        onTap: (_selectedTariffIndex != null && state
+                            .selectedCard != null)
                             ? () {
-                          // TODO: Забронировать самокат
-                          //usecase booking
+                          context.read<TariffSheetBloc>().add(
+                              BookScooterPressed(widget.scooter.id,
+                                  state.tariffs[_selectedTariffIndex ?? 10].id,
+                                  0, state.selectedCard?.id, false, false));
                           Navigator.pop(context, true);
                         }
-                            : null,*/
+                            : null,
                       ),
                     ),
                   ],
@@ -386,7 +417,7 @@ class _TariffCard extends StatelessWidget {
         decoration: BoxDecoration(
           // 🔹 Фон темнее при выборе
           color: isSelected
-              ? const Color(0xFF1A1F3E)  // тёмный фон
+              ? const Color(0xFF1A1F3E) // тёмный фон
               : Colors.white.withOpacity(0.19),
           borderRadius: BorderRadius.circular(20),
           // 🔹 Убираем рамку полностью
@@ -446,16 +477,17 @@ class _TariffCard extends StatelessWidget {
             ),
             const SizedBox(height: 12),
             // Детали
-            ...details.map((detail) => Padding(
-              padding: const EdgeInsets.only(bottom: 4),
-              child: Text(
-                detail,
-                style: TextStyle(
-                  color: isSelected ? Colors.white : Colors.white70,
-                  fontSize: 12,
-                ),
-              ),
-            )),
+            ...details.map((detail) =>
+                Padding(
+                  padding: const EdgeInsets.only(bottom: 4),
+                  child: Text(
+                    detail,
+                    style: TextStyle(
+                      color: isSelected ? Colors.white : Colors.white70,
+                      fontSize: 12,
+                    ),
+                  ),
+                )),
           ],
         ),
       ),

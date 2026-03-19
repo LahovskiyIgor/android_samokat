@@ -1,6 +1,8 @@
 import 'dart:async';
+import 'package:collection/collection.dart';
 
 import 'package:by_happy/domain/entities/payment_card.dart';
+import 'package:by_happy/domain/usecase/book_scooter_usecase.dart';
 import 'package:by_happy/domain/usecase/get_payment_cards_usecase.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
@@ -13,28 +15,30 @@ import '../state/tariff_sheet_state.dart';
 class TariffSheetBloc extends Bloc<TariffSheetEvent, TariffSheetState> {
   final GetAvailableTariffsUsecase _getAvailableTariffsUsecase;
   final GetPaymentCardsUsecase _getPaymentCardsUsecase;
+  final BookScooterUsecase _bookScooterUsecase;
 
-  TariffSheetBloc(this._getAvailableTariffsUsecase, this._getPaymentCardsUsecase)
+  TariffSheetBloc(this._getAvailableTariffsUsecase,
+      this._getPaymentCardsUsecase, this._bookScooterUsecase)
       : super(TariffSheetState(status: TariffSheetStatus.initial)) {
     on<TariffSheetStarted>(_onStarted);
     on<PaymentCardChanged>(_onPaymentCardChanged);
+    on<BookScooterPressed>(_onBookScooterPressed);
   }
 
-  Future<void> _onStarted(
-    TariffSheetStarted event,
-    Emitter<TariffSheetState> emit,
-  ) async {
+  Future<void> _onStarted(TariffSheetStarted event,
+      Emitter<TariffSheetState> emit,) async {
     emit(state.copyWith(status: TariffSheetStatus.loading));
 
     try {
       final result = await _getAvailableTariffsUsecase(event.scooterId);
       final cards_result = await _getPaymentCardsUsecase();
 
-      if (result is Success<List<Tariff>> && cards_result is Success<List<PaymentCard>>) {
+      if (result is Success<List<Tariff>> &&
+          cards_result is Success<List<PaymentCard>>) {
         emit(state.copyWith(
-          status: TariffSheetStatus.success,
-          tariffs: result.data ?? [],
-          selectedCard: cards_result.data?.firstWhere((element) => element.isMain)
+            status: TariffSheetStatus.success,
+            tariffs: result.data ?? [],
+            selectedCard: cards_result.data?.firstWhereOrNull((element) => element.isMain)
         ));
       } else {
         emit(state.copyWith(
@@ -42,21 +46,22 @@ class TariffSheetBloc extends Bloc<TariffSheetEvent, TariffSheetState> {
           errorMessage: 'Failed to load tariffs',
         ));
       }
-    } catch (e) {
+    } catch (e, stackTrace) {
       emit(state.copyWith(
         status: TariffSheetStatus.failure,
-        errorMessage: e.toString(),
+        errorMessage: "ERROR: ${e.toString()} \n $stackTrace",
       ));
     }
   }
 
-  FutureOr<void> _onPaymentCardChanged(PaymentCardChanged event, Emitter<TariffSheetState> emit) {
+  FutureOr<void> _onPaymentCardChanged(PaymentCardChanged event,
+      Emitter<TariffSheetState> emit) {
     try {
       emit(
-        state.copyWith(
-          status: TariffSheetStatus.success,
-          selectedCard: event.card
-        )
+          state.copyWith(
+              status: TariffSheetStatus.success,
+              selectedCard: event.card
+          )
       );
     } catch (e) {
       emit(state.copyWith(
@@ -64,6 +69,22 @@ class TariffSheetBloc extends Bloc<TariffSheetEvent, TariffSheetState> {
         errorMessage: 'Failed to change card',
       ));
     }
+  }
 
+  FutureOr<void> _onBookScooterPressed(BookScooterPressed event,
+      Emitter<TariffSheetState> emit) {
+    try {
+      _bookScooterUsecase(scooterId: event.scooterId,
+          planId: event.planId,
+          cardId: event.cardId,
+          subscriptionId: event.subscriptionId,
+          isBalance: event.isBalance,
+          isInsurance: event.isInsurance);
+    } catch (e) {
+      emit(state.copyWith(
+        status: TariffSheetStatus.failure,
+        errorMessage: 'Failed to book scooter',
+      ));
+    }
   }
 }

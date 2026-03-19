@@ -9,7 +9,7 @@ class GetClientOrdersUsecase {
 
   GetClientOrdersUsecase(this.repository);
 
-  Future<Result<List<ScooterOrder>>> call(int clientId) {
-    return repository.getClientOrders(clientId);
+  Future<Result<List<ScooterOrder>>> call() {
+    return repository.getClientOrders();
   }
 }

@@ -223,10 +223,10 @@ class ScooterRepositoryImpl extends ScooterRepository {
   }
 
   @override
-  Future<Result<List<ScooterOrder>>> getClientOrders(int clientId) async {
+  Future<Result<List<ScooterOrder>>> getClientOrders() async {
     late final Result<List<ScooterOrder>> result;
     try {
-      final orders = await _apiService.getClientOrders(clientId);
+      final orders = await _apiService.getClientOrders();
       result = Success(orders);
     } on AuthException catch (e) {
       result = Failure(AuthFailure(e.attemptsLeft));

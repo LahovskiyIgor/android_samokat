@@ -2,11 +2,11 @@ import 'dart:async';
 import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import '../../domain/entities/scooter_order.dart';
-import '../../di/service_locator.dart';
-import '../viewmodel/current_rides_bloc.dart';
-import '../event/current_rides_event.dart';
-import '../state/current_rides_state.dart';
+import '../../../di/service_locator.dart';
+import '../../../domain/entities/scooter_order.dart';
+import '../../event/current_rides_event.dart';
+import '../../state/current_rides_state.dart';
+import '../../viewmodel/current_rides_bloc.dart';
 import '../gradient_button.dart';
 import 'reserved_ride_sheet.dart';
 import 'active_ride_sheet.dart';
@@ -221,7 +221,7 @@ class _RideCardState extends State<_RideCard> {
 
   @override
   Widget build(BuildContext context) {
-    final isReserved = widget.order.status == 'reserved' || 
+    final isReserved = widget.order.status == 'Booking' ||    //Drive, Finish
                        widget.order.status == 'holding';
     Duration displayTime;
     if (isReserved) {
@@ -396,10 +396,10 @@ class _RideCardState extends State<_RideCard> {
   }
 
   String _getLocationText() {
-    if (widget.order.scooter != null && widget.order.scooter!.address != null) {
+    /*if (widget.order.scooter != null && widget.order.scooter!.address != null) {
       return widget.order.scooter!.address!;
-    }
-    return '';
+    }*/
+    return 'Московский 33';
   }
 
   String _formatDuration(Duration duration) {

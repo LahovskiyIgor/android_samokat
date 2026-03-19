@@ -13,6 +13,7 @@ import 'package:by_happy/domain/repositories/scooter_repository.dart';
 import 'package:by_happy/domain/repositories/zone_repository.dart';
 import 'package:by_happy/domain/service/security_service.dart';
 import 'package:by_happy/domain/usecase/add_payment_card_usecase.dart'; // ← новый
+import 'package:by_happy/domain/usecase/book_scooter_usecase.dart';
 import 'package:by_happy/domain/usecase/create_pin_usecase.dart';
 import 'package:by_happy/domain/usecase/get_address_by_point_usecase.dart';
 import 'package:by_happy/domain/usecase/get_available_scooters_usecase.dart';
@@ -135,6 +136,7 @@ Future<void> setupDependencies() async {
   getIt.registerSingleton<GetPaymentCardsUsecase>(GetPaymentCardsUsecase(getIt(), getIt()));
 
   getIt.registerSingleton<GetClientOrdersUsecase>(GetClientOrdersUsecase(getIt()));
+  getIt.registerSingleton<BookScooterUsecase>(BookScooterUsecase(getIt()));
 
   // Blocs
   getIt.registerLazySingleton<SplashBloc>(() => SplashBloc(getIt()));
@@ -159,7 +161,7 @@ Future<void> setupDependencies() async {
 
   getIt.registerFactory<AddCardBloc>(() => AddCardBloc(getIt()));
 
-  getIt.registerFactory<TariffSheetBloc>(() => TariffSheetBloc(getIt(), getIt()));
+  getIt.registerFactory<TariffSheetBloc>(() => TariffSheetBloc(getIt(), getIt(), getIt()));
 
   getIt.registerFactory<PaymentMethodSheetBloc>(() => PaymentMethodSheetBloc(getIt()));
 

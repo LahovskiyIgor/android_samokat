@@ -22,5 +22,5 @@ abstract class ScooterRepository {
   Future<Result<ScooterOrder>> resumeRide(int orderId);
   Future<Result<ScooterOrder>> finishRide(int orderId);
   Future<Result<ScooterOrder>> payRide(int orderId);
-  Future<Result<List<ScooterOrder>>> getClientOrders(int clientId);
+  Future<Result<List<ScooterOrder>>> getClientOrders();
 }

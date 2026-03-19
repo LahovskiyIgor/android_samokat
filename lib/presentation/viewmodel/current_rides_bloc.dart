@@ -1,3 +1,4 @@
+import 'package:by_happy/domain/usecase/get_profile_usecase.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../core/result.dart';
@@ -19,9 +20,12 @@ class CurrentRidesBloc extends Bloc<CurrentRidesEvent, CurrentRidesState> {
   ) async {
     emit(state.copyWith(status: CurrentRidesStatus.loading));
 
-    final result = await _getClientOrdersUsecase(event.clientId);
+    final result = await _getClientOrdersUsecase();
 
     if (result is Success<List<ScooterOrder>>) {
+
+      print("RESULT: ${result.data}");
+
       emit(state.copyWith(
         status: CurrentRidesStatus.success,
         orders: result.data ?? [],

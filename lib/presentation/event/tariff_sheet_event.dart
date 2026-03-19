@@ -13,3 +13,17 @@ class PaymentCardChanged extends TariffSheetEvent {
 
   PaymentCardChanged(this.card);
 }
+
+class BookScooterPressed extends TariffSheetEvent {
+  final int scooterId;
+  final int planId;
+  final int? subscriptionId;
+  final int? cardId;
+  final bool isBalance;
+  final bool isInsurance;
+
+  BookScooterPressed(this.scooterId, this.planId, this.subscriptionId,
+      this.cardId, this.isBalance, this.isInsurance);
+
+
+}

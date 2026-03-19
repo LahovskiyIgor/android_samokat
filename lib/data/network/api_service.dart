@@ -662,7 +662,7 @@ class ApiService {
     required bool isBalance,
     required bool isInsurance,
   }) async {
-    final url = Uri.parse("$baseUrl/order/booking");
+    final url = Uri.parse("$baseUrl/scooterorder/booking");
 
     final accessToken = await _securityService.getAccessToken();
     if (accessToken == null) {
@@ -720,7 +720,7 @@ class ApiService {
   }
 
   Future<ScooterOrder?> startRide(int orderId) async {
-    final url = Uri.parse("$baseUrl/order/$orderId/start");
+    final url = Uri.parse("$baseUrl/scooterorder/$orderId/start");
 
     final accessToken = await _securityService.getAccessToken();
     if (accessToken == null) {
@@ -760,7 +760,7 @@ class ApiService {
   }
 
   Future<ScooterOrder?> cancelRide(int orderId) async {
-    final url = Uri.parse("$baseUrl/order/$orderId/cancel");
+    final url = Uri.parse("$baseUrl/scooterorder/$orderId/cancel");
 
     final accessToken = await _securityService.getAccessToken();
     if (accessToken == null) {
@@ -800,7 +800,7 @@ class ApiService {
   }
 
   Future<ScooterOrder?> pauseRide(int orderId) async {
-    final url = Uri.parse("$baseUrl/order/$orderId/pause");
+    final url = Uri.parse("$baseUrl/scooterorder/$orderId/pause");
 
     final accessToken = await _securityService.getAccessToken();
     if (accessToken == null) {
@@ -840,7 +840,7 @@ class ApiService {
   }
 
   Future<ScooterOrder?> resumeRide(int orderId) async {
-    final url = Uri.parse("$baseUrl/order/$orderId/resume");
+    final url = Uri.parse("$baseUrl/scooterorder/$orderId/resume");
 
     final accessToken = await _securityService.getAccessToken();
     if (accessToken == null) {
@@ -880,7 +880,7 @@ class ApiService {
   }
 
   Future<ScooterOrder?> finishRide(int orderId) async {
-    final url = Uri.parse("$baseUrl/order/$orderId/finish");
+    final url = Uri.parse("$baseUrl/scooterorder/$orderId/finish");
 
     final accessToken = await _securityService.getAccessToken();
     if (accessToken == null) {
@@ -920,7 +920,7 @@ class ApiService {
   }
 
   Future<ScooterOrder?> payRide(int orderId) async {
-    final url = Uri.parse("$baseUrl/order/$orderId/pay");
+    final url = Uri.parse("$baseUrl/scooterorder/$orderId/pay");
 
     final accessToken = await _securityService.getAccessToken();
     if (accessToken == null) {
@@ -959,14 +959,32 @@ class ApiService {
     throw AuthException('Ошибка сервера: ${response.statusCode}', 0);
   }
 
-  Future<List<ScooterOrder>> getClientOrders(int clientId) async {
-    final url = Uri.parse("$baseUrl/order/$clientId/client");
-
+  Future<List<ScooterOrder>> getClientOrders() async {
+    // 1. Получаем токен
     final accessToken = await _securityService.getAccessToken();
     if (accessToken == null) {
       print("APISERVICE Error: Access token is null.");
       throw UnauthorizedException();
     }
+
+    /*final meUrl = Uri.parse("$baseUrl/client/me");
+    final meResponse = await http.get(
+      meUrl,
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": "Bearer $accessToken",
+      },
+    );
+
+    if (meResponse.statusCode != 200) {
+      print("APISERVICE Error: Failed to get client info. Status: ${meResponse.statusCode}");
+      throw Exception('Не удалось получить данные пользователя');
+    }
+
+    final meData = jsonDecode(utf8.decode(meResponse.bodyBytes));
+    final int clientId = meData['id']; // Извлекаем id из JSON
+*/
+    final url = Uri.parse("$baseUrl/scooterorder/active");
 
     print("GET CLIENT ORDERS REQUEST:");
     print("URL: $url");
@@ -985,9 +1003,13 @@ class ApiService {
 
     if (response.statusCode == 200) {
       final data = jsonDecode(utf8.decode(response.bodyBytes));
-      if (data is List) {
-        return data.map((json) => ScooterOrder.fromJson(json)).toList();
+
+      // Проверяем, что пришел объект и в нем есть ключ 'data'
+      if (data is Map<String, dynamic> && data['data'] is List) {
+        final List ordersList = data['data'];
+        return ordersList.map((json) => ScooterOrder.fromJson(json)).toList();
       }
+
       return [];
     } else if (response.statusCode == 401) {
       throw UnauthorizedException();
@@ -997,4 +1019,6 @@ class ApiService {
 
     throw Exception('Ошибка сервера: ${response.statusCode}');
   }
+
+
 }

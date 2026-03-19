@@ -28,7 +28,7 @@ class Tariff {
       title: json['title'] ?? 'Unknown',
       description: json['description'] ?? '',
       isActive: json['isActive'] ?? false,
-      currency: currency['code'] ?? currency['currency'] ?? 'RUB',
+      currency: currency['currency'] ?? 'BYN',
       holdPrice: (planPrice['hold'] as num?)?.toDouble() ?? 0.0,
       drivePrice: (planPrice['drive'] as num?)?.toDouble() ?? 0.0,
       pausePrice: (planPrice['pause'] as num?)?.toDouble() ?? 0.0,
