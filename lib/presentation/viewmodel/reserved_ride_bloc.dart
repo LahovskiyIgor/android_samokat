@@ -35,7 +35,7 @@ class ReservedRideBloc extends Bloc<ReservedRideEvent, ReservedRideState> {
     } else if (result is Failure) {
       emit(state.copyWith(
         status: ReservedRideStatus.failure,
-        errorMessage: result.errorMessage ?? 'Не удалось начать поездку',
+        errorMessage: 'Не удалось начать поездку',
       ));
     }
   }
@@ -56,7 +56,7 @@ class ReservedRideBloc extends Bloc<ReservedRideEvent, ReservedRideState> {
     } else if (result is Failure) {
       emit(state.copyWith(
         status: ReservedRideStatus.failure,
-        errorMessage: result.errorMessage ?? 'Не удалось отменить бронирование',
+        errorMessage: 'Не удалось отменить бронирование',
       ));
     }
   }
