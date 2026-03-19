@@ -41,6 +41,9 @@ import 'package:by_happy/presentation/viewmodel/profile_bloc.dart';
 import 'package:by_happy/presentation/viewmodel/scooter_detail_bloc.dart';
 import 'package:by_happy/presentation/viewmodel/splash_bloc.dart';
 import 'package:by_happy/presentation/viewmodel/tariff_sheet_bloc.dart';
+import 'package:by_happy/domain/usecase/cancel_ride_usecase.dart';
+import 'package:by_happy/domain/usecase/start_ride_usecase.dart';
+import 'package:by_happy/presentation/viewmodel/reserved_ride_bloc.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:get_it/get_it.dart';
 import 'package:http/http.dart' as http;
@@ -138,6 +141,9 @@ Future<void> setupDependencies() async {
   getIt.registerSingleton<GetClientOrdersUsecase>(GetClientOrdersUsecase(getIt()));
   getIt.registerSingleton<BookScooterUsecase>(BookScooterUsecase(getIt()));
 
+  getIt.registerSingleton<StartRideUsecase>(StartRideUsecase(getIt()));
+  getIt.registerSingleton<CancelRideUsecase>(CancelRideUsecase(getIt()));
+
   // Blocs
   getIt.registerLazySingleton<SplashBloc>(() => SplashBloc(getIt()));
 
@@ -166,4 +172,6 @@ Future<void> setupDependencies() async {
   getIt.registerFactory<PaymentMethodSheetBloc>(() => PaymentMethodSheetBloc(getIt()));
 
   getIt.registerFactory<CurrentRidesBloc>(() => CurrentRidesBloc(getIt()));
+
+  getIt.registerFactory<ReservedRideBloc>(() => ReservedRideBloc(getIt(), getIt()));
 }
