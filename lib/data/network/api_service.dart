@@ -1208,5 +1208,41 @@ class ApiService {
     throw AuthException('Ошибка сервера: ${response.statusCode}', 0);
   }
 
+  // 🔹 НОВОСТИ
+  Future<Map<String, dynamic>> getNews() async {
+    final url = Uri.parse("$baseUrl/news");
+
+    print("GET NEWS REQUEST:");
+    print("URL: $url");
+
+    final accessToken = await _securityService.getAccessToken();
+    if (accessToken == null) {
+      print("APISERVICE Error: Access token is null.");
+      throw UnauthorizedException();
+    }
+
+    final response = await http.get(
+      url,
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": "Bearer $accessToken",
+      },
+    );
+
+    print("GET NEWS RESPONSE:");
+    print("STATUS: ${response.statusCode}");
+    print("BODY: ${response.body}");
+
+    if (response.statusCode == 200) {
+      final data = jsonDecode(utf8.decode(response.bodyBytes));
+      return data;
+    } else if (response.statusCode == 401) {
+      throw UnauthorizedException();
+    } else if (response.statusCode == 403) {
+      throw AuthBlockException();
+    }
+
+    throw Exception('Ошибка сервера: ${response.statusCode}');
+  }
 
 }

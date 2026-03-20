@@ -19,6 +19,7 @@ import 'package:go_router/go_router.dart';
 import 'package:path/path.dart';
 
 import '../screens/add_card_screen.dart'; // ← новый импорт
+import '../screens/payment_methods_screen.dart';
 import '../screens/phone_login_screen.dart';
 import '../screens/phone_screen.dart';
 import '../screens/pin_login_screen.dart';
@@ -112,13 +113,18 @@ class AppRouter {
             path: 'qr',
             builder: (context, state) => const QrScanScreen(),
           ),
-
           GoRoute(
-            path: 'add-card',
-            builder: (context, state) => BlocProvider(
-              create: (context) => getIt<AddCardBloc>(),
-              child: const AddCardScreen(),
-            ),
+              path: 'payment-methods',
+              builder: (context, state) => const PaymentMethodsScreen(),
+              routes: [
+                GoRoute(
+                  path: 'add-card',
+                  builder: (context, state) => BlocProvider(
+                    create: (context) => getIt<AddCardBloc>(),
+                    child: const AddCardScreen(),
+                  ),
+                )
+              ]
           ),
         ],
       ),

@@ -81,7 +81,7 @@ class SideMenu extends StatelessWidget {
                             _MenuItem(
                               icon: Icons.credit_card,
                               title: 'Способ оплаты',
-                              onTap: () => context.go("/home/add-card"),
+                              onTap: () => context.go("/home/payment-methods"),
                             ),
                             _MenuItem(
                               icon: Icons.question_mark_sharp,

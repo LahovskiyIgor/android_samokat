@@ -56,13 +56,17 @@ import 'package:shared_preferences/shared_preferences.dart';
 import '../data/network/api_service.dart';
 import '../data/network/geocoding_remote_datasource.dart';
 import '../data/repositories/auth_repository_impl.dart';
+import '../data/repositories/news_repository_impl.dart';
 import '../data/repositories/pin_repository_impl.dart';
 import '../data/repositories/profile_repository_impl.dart';
+import '../data/service/news_api_service.dart';
 import '../domain/repositories/auth_repository.dart';
+import '../domain/repositories/news_repository.dart';
 import '../domain/service/device_info_service.dart';
 import '../presentation/viewmodel/auth_bloc.dart';
 import '../presentation/viewmodel/edit_profile_bloc.dart';
 import '../presentation/viewmodel/map_bloc.dart';
+import '../presentation/viewmodel/news_bloc.dart';
 import '../presentation/viewmodel/scooter_detail_modal_bloc.dart';
 import '../presentation/viewmodel/verify_code_bloc.dart';
 
@@ -89,6 +93,8 @@ Future<void> setupDependencies() async {
 
   getIt.registerSingleton<AppSettingsService>(AppSettingsService(getIt()));
 
+  getIt.registerLazySingleton<NewsApiService>(() => NewsApiService(getIt<ApiService>()));
+
   // Repository
   getIt.registerSingleton<AuthRepository>(
     AuthRepositoryImpl(getIt(), getIt(), getIt()),
@@ -107,6 +113,8 @@ Future<void> setupDependencies() async {
   getIt.registerSingleton<AppSettingsRepository>(AppSettingsRepositoryImpl(getIt()));
 
   getIt.registerSingleton<PaymentRepository>(PaymentRepositoryImpl(getIt(), getIt()));
+
+  getIt.registerLazySingleton<NewsRepository>(() => NewsRepositoryImpl(getIt<NewsApiService>()));
 
   // Use Cases
   getIt.registerSingleton<LoginUseCase>(LoginUseCase(getIt()));
@@ -183,4 +191,6 @@ Future<void> setupDependencies() async {
   getIt.registerFactory<CurrentRidesBloc>(() => CurrentRidesBloc(getIt()));
 
   getIt.registerFactory<ReservedRideBloc>(() => ReservedRideBloc(getIt(), getIt()));
+
+  getIt.registerFactory<NewsBloc>(() => NewsBloc(getIt<NewsRepository>()));
 }
