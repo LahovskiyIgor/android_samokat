@@ -45,18 +45,21 @@ class ActiveRideBloc extends Bloc<ActiveRideEvent, ActiveRideState> {
     final result = await _getScooterOrderByIdUsecase(event.orderId);
 
     if (result is Success<ScooterOrder>) {
-      final order = result.data;
-      final startTime = order.startAt ?? order.createdAt;
-      final elapsedTime = DateTime.now().difference(startTime);
-      final isPaused = order.status.toLowerCase() == 'paused';
+      final order = result.data; // Здесь order уже не null, если Success реализован верно
+
+      // Исправляем доступ к полям:
+      // 1. Используем ?? для startAt, так как он nullable
+      final startTime = order?.startAt ?? order?.createdAt;
+      final elapsedTime = DateTime.now().difference(startTime!);
+      final isPaused = order?.status.toLowerCase() == 'pause';
 
       emit(state.copyWith(
         status: ActiveRideStatus.success,
         order: order,
         elapsedTime: elapsedTime,
-        speed: order.scooter?.speed ?? 0.0,
-        distance: order.distance ?? 0.0,
-        cost: order.totalCost ?? 0.0,
+        speed: 0.0,
+        distance: 0.0,
+        cost: order?.totalPrice ?? 0.0,
         isPaused: isPaused,
       ));
 
@@ -71,6 +74,8 @@ class ActiveRideBloc extends Bloc<ActiveRideEvent, ActiveRideState> {
         errorMessage: 'Не удалось загрузить информацию о поездке',
       ));
     }
+    print("CURRENT STATE $state");
+
   }
 
   Future<void> _onPauseRide(
@@ -93,6 +98,7 @@ class ActiveRideBloc extends Bloc<ActiveRideEvent, ActiveRideState> {
         errorMessage: 'Не удалось поставить поездку на паузу',
       ));
     }
+    print("CURRENT STATE $state");
   }
 
   Future<void> _onResumeRide(
@@ -115,6 +121,7 @@ class ActiveRideBloc extends Bloc<ActiveRideEvent, ActiveRideState> {
         errorMessage: 'Не удалось возобновить поездку',
       ));
     }
+    print("CURRENT STATE $state");
   }
 
   Future<void> _onFinishRide(
@@ -146,18 +153,20 @@ class ActiveRideBloc extends Bloc<ActiveRideEvent, ActiveRideState> {
 
     if (result is Success<ScooterOrder>) {
       final order = result.data;
-      final startTime = order.startAt ?? order.createdAt;
-      final elapsedTime = DateTime.now().difference(startTime);
-      final isPaused = order.status.toLowerCase() == 'paused';
+      final startTime = order?.startAt ?? order?.createdAt;
+      final elapsedTime = DateTime.now().difference(startTime!);
+      final isPaused = order?.status.toLowerCase() == 'pause';
 
       emit(state.copyWith(
         order: order,
         elapsedTime: elapsedTime,
-        speed: order.scooter?.speed ?? state.speed,
-        distance: order.distance ?? state.distance,
-        cost: order.totalCost ?? state.cost,
+        speed: state.speed,
+        distance: state.distance,
+        cost: order?.totalPrice ?? state.cost,
         isPaused: isPaused,
       ));
     }
+    print("CURRENT STATE $state");
+
   }
 }

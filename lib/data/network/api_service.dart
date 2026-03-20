@@ -1126,7 +1126,7 @@ class ApiService {
   }
 
   Future<ScooterOrder?> getScooterOrderById({required int id}) async {
-    final url = Uri.parse("$baseUrl/scooterorder/$id");
+    final url = Uri.parse("$baseUrl/scooterorder/$id/client");
 
     final accessToken = await _securityService.getAccessToken();
     if (accessToken == null) {

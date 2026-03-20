@@ -44,4 +44,9 @@ class ActiveRideState {
       isPaused: isPaused ?? this.isPaused,
     );
   }
+
+  @override
+  String toString() {
+    return 'ActiveRideState{status: $status, cost: $cost, isPaused: $isPaused}';
+  }
 }

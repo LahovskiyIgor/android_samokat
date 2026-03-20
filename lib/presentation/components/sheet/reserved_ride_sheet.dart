@@ -224,6 +224,7 @@ class _ReservedRideSheetState extends State<ReservedRideSheet> {
                             builder: (context) => ActiveRideSheet(
                               scooterNumber: widget.scooterNumber,
                               initialElapsedTime: Duration.zero,
+                              orderId: widget.orderId,
                             ),
                           );
                         } else if (state.status == ReservedRideStatus.failure) {
