@@ -1,15 +1,23 @@
 import 'dart:async';
 import 'dart:ui';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+
+import '../../../di/service_locator.dart';
+import '../../event/active_ride_event.dart';
+import '../../state/active_ride_state.dart';
+import '../../viewmodel/active_ride_bloc.dart';
 
 class ActiveRideSheet extends StatefulWidget {
   final String scooterNumber;
   final Duration initialElapsedTime;
+  final int orderId;
 
   const ActiveRideSheet({
     super.key,
     required this.scooterNumber,
     this.initialElapsedTime = Duration.zero,
+    required this.orderId,
   });
 
   @override
@@ -17,28 +25,18 @@ class ActiveRideSheet extends StatefulWidget {
 }
 
 class _ActiveRideSheetState extends State<ActiveRideSheet> {
-  late Duration _elapsedTime;
-  double _speed = 12.3;
-  double _distance = 3.8;
-  double _cost = 12.3;
-  late Timer _timer;
+  late final ActiveRideBloc _bloc;
 
   @override
   void initState() {
     super.initState();
-    _elapsedTime = widget.initialElapsedTime;
-    _timer = Timer.periodic(const Duration(seconds: 1), (timer) {
-      if (mounted) {
-        setState(() {
-          _elapsedTime = _elapsedTime + const Duration(seconds: 1);
-        });
-      }
-    });
+    _bloc = getIt<ActiveRideBloc>();
+    _bloc.add(LoadScooterOrder(widget.orderId));
   }
 
   @override
   void dispose() {
-    _timer.cancel();
+    _bloc.close();
     super.dispose();
   }
 
