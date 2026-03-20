@@ -1,13 +1,20 @@
 import 'dart:async';
 import 'dart:ui';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import '../../../di/service_locator.dart';
+import '../../event/active_ride_event.dart';
+import '../../state/active_ride_state.dart';
+import '../../viewmodel/active_ride_bloc.dart';
 
 class ActiveRideSheet extends StatefulWidget {
+  final int orderId;
   final String scooterNumber;
   final Duration initialElapsedTime;
 
   const ActiveRideSheet({
     super.key,
+    required this.orderId,
     required this.scooterNumber,
     this.initialElapsedTime = Duration.zero,
   });
@@ -17,33 +24,83 @@ class ActiveRideSheet extends StatefulWidget {
 }
 
 class _ActiveRideSheetState extends State<ActiveRideSheet> {
-  late Duration _elapsedTime;
-  double _speed = 12.3;
-  double _distance = 3.8;
-  double _cost = 12.3;
-  late Timer _timer;
+  late final ActiveRideBloc _bloc;
+  Timer? _localTimer;
 
   @override
   void initState() {
     super.initState();
-    _elapsedTime = widget.initialElapsedTime;
-    _timer = Timer.periodic(const Duration(seconds: 1), (timer) {
-      if (mounted) {
-        setState(() {
-          _elapsedTime = _elapsedTime + const Duration(seconds: 1);
-        });
+    _bloc = getIt<ActiveRideBloc>();
+    _bloc.add(LoadScooterOrder(widget.orderId));
+    
+    // Локальный таймер для обновления UI каждую секунду
+    _localTimer = Timer.periodic(const Duration(seconds: 1), (timer) {
+      if (mounted && !_bloc.state.isPaused) {
+        setState(() {});
       }
     });
   }
 
   @override
   void dispose() {
-    _timer.cancel();
+    _localTimer?.cancel();
+    _bloc.close();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
+    return BlocProvider.value(
+      value: _bloc,
+      child: BlocBuilder<ActiveRideBloc, ActiveRideState>(
+        builder: (context, state) {
+          if (state.status == ActiveRideStatus.loading && state.order == null) {
+            return Align(
+              alignment: Alignment.bottomCenter,
+              child: Container(
+                padding: const EdgeInsets.all(40),
+                decoration: BoxDecoration(
+                  color: const Color(0x00000032).withOpacity(0.6),
+                  borderRadius: const BorderRadius.vertical(top: Radius.circular(30)),
+                ),
+                child: const CircularProgressIndicator(color: Colors.white),
+              ),
+            );
+          }
+
+          if (state.status == ActiveRideStatus.failure && state.order == null) {
+            return Align(
+              alignment: Alignment.bottomCenter,
+              child: Container(
+                padding: const EdgeInsets.all(40),
+                decoration: BoxDecoration(
+                  color: const Color(0x00000032).withOpacity(0.6),
+                  borderRadius: const BorderRadius.vertical(top: Radius.circular(30)),
+                ),
+                child: Text(
+                  state.errorMessage ?? 'Ошибка загрузки',
+                  style: const TextStyle(color: Colors.white),
+                ),
+              ),
+            );
+          }
+
+          return _buildContent(state);
+        },
+      ),
+    );
+  }
+
+  Widget _buildContent(ActiveRideState state) {
+    final displayTime = state.isPaused 
+        ? state.elapsedTime 
+        : state.elapsedTime + (DateTime.now().difference(DateTime.now().subtract(const Duration(seconds: 1))));
+    
+    // Для отображения текущего времени в реальном времени
+    final effectiveElapsedTime = state.isPaused 
+        ? state.elapsedTime 
+        : DateTime.now().difference(state.order?.startAt ?? state.order?.createdAt ?? DateTime.now());
+
     return Align(
       alignment: Alignment.bottomCenter,
       child: ClipRRect(
@@ -53,7 +110,6 @@ class _ActiveRideSheetState extends State<ActiveRideSheet> {
           child: Container(
             padding: const EdgeInsets.only(top: 20, bottom: 10),
             decoration: BoxDecoration(
-              // ✅ Более прозрачный фон менюшки
               color: const Color(0x00000032).withOpacity(0.6),
               borderRadius: const BorderRadius.vertical(top: Radius.circular(30)),
             ),
@@ -110,14 +166,13 @@ class _ActiveRideSheetState extends State<ActiveRideSheet> {
                   margin: const EdgeInsets.symmetric(horizontal: 20),
                   padding: const EdgeInsets.symmetric(vertical: 16),
                   decoration: BoxDecoration(
-                    // ✅ Белый фон с прозрачностью 0.15
                     color: Colors.white.withOpacity(0.15),
                     borderRadius: BorderRadius.circular(16),
                   ),
                   child: Column(
                     children: [
                       Text(
-                        _formatDuration(_elapsedTime),
+                        _formatDuration(effectiveElapsedTime),
                         style: const TextStyle(
                           color: Colors.white,
                           fontSize: 32,
@@ -128,7 +183,7 @@ class _ActiveRideSheetState extends State<ActiveRideSheet> {
                       ),
                       const SizedBox(height: 4),
                       Text(
-                        'время в пути',
+                        state.isPaused ? 'на паузе' : 'время в пути',
                         style: TextStyle(
                           color: Colors.white.withOpacity(0.6),
                           fontSize: 13,
@@ -149,31 +204,44 @@ class _ActiveRideSheetState extends State<ActiveRideSheet> {
                         child: Container(
                           height: 56,
                           decoration: BoxDecoration(
-                            gradient: const LinearGradient(
-                              colors: [Color(0xFF66E3C4), Color(0xFF4CD1B5)],
-                            ),
+                            gradient: state.isPaused
+                                ? null
+                                : const LinearGradient(
+                                    colors: [Color(0xFF66E3C4), Color(0xFF4CD1B5)],
+                                  ),
+                            color: state.isPaused ? Colors.white.withOpacity(0.15) : null,
                             borderRadius: BorderRadius.circular(16),
                           ),
                           child: Material(
                             color: Colors.transparent,
                             child: InkWell(
-                              onTap: () {
-                                // TODO: Пауза
-                              },
+                              onTap: state.status == ActiveRideStatus.loading
+                                  ? null
+                                  : () {
+                                      if (state.isPaused) {
+                                        _bloc.add(ResumeRide(widget.orderId));
+                                      } else {
+                                        _bloc.add(PauseRide(widget.orderId));
+                                      }
+                                    },
                               borderRadius: BorderRadius.circular(16),
                               child: Column(
                                 mainAxisAlignment: MainAxisAlignment.center,
                                 children: [
-                                  const Icon(
-                                    Icons.pause,
-                                    color: Color(0xFF0A0F2E),
+                                  Icon(
+                                    state.isPaused ? Icons.play_arrow : Icons.pause,
+                                    color: state.isPaused
+                                        ? Colors.white.withOpacity(0.8)
+                                        : const Color(0xFF0A0F2E),
                                     size: 24,
                                   ),
                                   const SizedBox(height: 4),
-                                  const Text(
-                                    'ПАУЗА',
+                                  Text(
+                                    state.isPaused ? 'ПРОДОЛЖИТЬ' : 'ПАУЗА',
                                     style: TextStyle(
-                                      color: Color(0xFF0A0F2E),
+                                      color: state.isPaused
+                                          ? Colors.white.withOpacity(0.8)
+                                          : const Color(0xFF0A0F2E),
                                       fontSize: 12,
                                       fontWeight: FontWeight.w600,
                                     ),
@@ -195,9 +263,11 @@ class _ActiveRideSheetState extends State<ActiveRideSheet> {
                           child: Material(
                             color: Colors.transparent,
                             child: InkWell(
-                              onTap: () {
-                                // TODO: Завершить поездку
-                              },
+                              onTap: state.status == ActiveRideStatus.loading
+                                  ? null
+                                  : () {
+                                      _bloc.add(FinishRide(widget.orderId));
+                                    },
                               borderRadius: BorderRadius.circular(16),
                               child: Column(
                                 mainAxisAlignment: MainAxisAlignment.center,
@@ -291,7 +361,7 @@ class _ActiveRideSheetState extends State<ActiveRideSheet> {
                                 child: Column(
                                   children: [
                                     Text(
-                                      _speed.toStringAsFixed(1),
+                                      state.speed.toStringAsFixed(1),
                                       style: const TextStyle(
                                         color: Colors.white,
                                         fontSize: 20,
@@ -321,7 +391,7 @@ class _ActiveRideSheetState extends State<ActiveRideSheet> {
                                 child: Column(
                                   children: [
                                     Text(
-                                      _distance.toStringAsFixed(1),
+                                      state.distance.toStringAsFixed(1),
                                       style: const TextStyle(
                                         color: Colors.white,
                                         fontSize: 20,
@@ -368,7 +438,7 @@ class _ActiveRideSheetState extends State<ActiveRideSheet> {
                                   text: TextSpan(
                                     children: [
                                       TextSpan(
-                                        text: _cost.toStringAsFixed(1),
+                                        text: state.cost.toStringAsFixed(1),
                                         style: const TextStyle(
                                           color: Colors.white,
                                           fontSize: 24,

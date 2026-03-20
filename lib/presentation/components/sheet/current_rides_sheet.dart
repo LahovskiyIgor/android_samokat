@@ -352,6 +352,7 @@ class _RideCardState extends State<_RideCard> {
                           isScrollControlled: true,
                           backgroundColor: Colors.transparent,
                           builder: (context) => ActiveRideSheet(
+                            orderId: widget.order.id,
                             scooterNumber: scooterNumber,
                             initialElapsedTime: _elapsedTime,
                           ),

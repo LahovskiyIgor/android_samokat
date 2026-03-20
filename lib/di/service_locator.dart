@@ -36,6 +36,10 @@ import 'package:by_happy/domain/usecase/upload_scooter_photos_usecase.dart';
 import 'package:by_happy/domain/usecase/update_scooter_order_data_usecase.dart';
 import 'package:by_happy/domain/usecase/pay_scooter_order_with_photos_usecase.dart';
 import 'package:by_happy/domain/usecase/get_scooter_order_by_id_usecase.dart';
+import 'package:by_happy/domain/usecase/finish_ride_usecase.dart';
+import 'package:by_happy/domain/usecase/pause_ride_usecase.dart';
+import 'package:by_happy/domain/usecase/resume_ride_usecase.dart';
+import 'package:by_happy/presentation/viewmodel/active_ride_bloc.dart';
 import 'package:by_happy/presentation/viewmodel/add_card_bloc.dart'; // ← новый
 import 'package:by_happy/presentation/viewmodel/current_rides_bloc.dart';
 import 'package:by_happy/presentation/viewmodel/map_settings_modal_bloc.dart';
@@ -161,6 +165,10 @@ Future<void> setupDependencies() async {
   getIt.registerSingleton<PayScooterOrderWithPhotosUsecase>(PayScooterOrderWithPhotosUsecase(getIt()));
   getIt.registerSingleton<GetScooterOrderByIdUsecase>(GetScooterOrderByIdUsecase(getIt()));
 
+  getIt.registerSingleton<FinishRideUsecase>(FinishRideUsecase(getIt()));
+  getIt.registerSingleton<PauseRideUsecase>(PauseRideUsecase(getIt()));
+  getIt.registerSingleton<ResumeRideUsecase>(ResumeRideUsecase(getIt()));
+
   // Blocs
   getIt.registerLazySingleton<SplashBloc>(() => SplashBloc(getIt()));
 
@@ -189,6 +197,10 @@ Future<void> setupDependencies() async {
   getIt.registerFactory<PaymentMethodSheetBloc>(() => PaymentMethodSheetBloc(getIt()));
 
   getIt.registerFactory<CurrentRidesBloc>(() => CurrentRidesBloc(getIt()));
+
+  getIt.registerFactory<ActiveRideBloc>(
+    () => ActiveRideBloc(getIt(), getIt(), getIt(), getIt()),
+  );
 
   getIt.registerFactory<ReservedRideBloc>(() => ReservedRideBloc(getIt(), getIt()));
 
